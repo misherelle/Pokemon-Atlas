@@ -73,6 +73,30 @@ function numberFromEnv(value, fallback) {
   return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : fallback
 }
 
+function cleanApiKey(value) {
+  if (!value) {
+    return ''
+  }
+
+  return String(value)
+    .trim()
+    .replace(/^POKEWALLET_API_KEY\s*=\s*/, '')
+    .replace(/^['"]|['"]$/g, '')
+    .trim()
+}
+
+function getApiKeyKind(apiKey) {
+  if (apiKey.startsWith('pk_live_')) {
+    return 'live'
+  }
+
+  if (apiKey.startsWith('pk_test_')) {
+    return 'test'
+  }
+
+  return apiKey ? 'unknown' : 'missing'
+}
+
 function shuffle(items) {
   return [...items].sort(() => Math.random() - 0.5)
 }
@@ -189,9 +213,12 @@ export function getPokeWalletConfig(env = processEnv) {
     .map((query) => query.trim())
     .filter(Boolean)
   const queryCount = configuredQueries.length || searchQueries.length
+  const apiKey = cleanApiKey(env.POKEWALLET_API_KEY)
 
   const config = {
-    apiKey: env.POKEWALLET_API_KEY,
+    apiKey,
+    apiKeyKind: getApiKeyKind(apiKey),
+    apiKeyLooksValid: /^pk_(live|test)_[a-zA-Z0-9]+$/.test(apiKey),
     cacheMinutes,
     cacheMs: cacheMinutes * 60 * 1000,
     maxHourlyRequests: numberFromEnv(
@@ -379,6 +406,8 @@ export function getStatus(env = processEnv) {
 
   return {
     configured: Boolean(config.apiKey),
+    apiKeyKind: config.apiKeyKind,
+    apiKeyLooksValid: config.apiKeyLooksValid,
     cacheMinutes: config.cacheMinutes,
     maxHourlyRequests: config.maxHourlyRequests,
     searchesPerRefresh: config.searchesPerRefresh,
