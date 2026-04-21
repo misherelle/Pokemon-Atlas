@@ -164,7 +164,20 @@ function getSearchQueries(config, now = Date.now()) {
 
 function normalizeCard(card) {
   const info = card.card_info ?? {}
-  const bestPrice = getBestPrice(card.tcgplayer?.prices)
+
+  const tcgplayerBestPrice = getBestPrice(card.tcgplayer?.prices)
+  const cardmarketPrice =
+    typeof card.cardmarket?.price === 'number' && card.cardmarket.price > 0
+      ? {
+          entry: {
+            sub_type_name: 'Cardmarket',
+            updated_at: card.cardmarket.updated_at,
+          },
+          price: card.cardmarket.price,
+        }
+      : null
+
+  const bestPrice = tcgplayerBestPrice || cardmarketPrice
 
   if (!bestPrice?.price || !card.id || !info.name || !isSingleCard(card)) {
     return null
@@ -287,36 +300,57 @@ async function fetchPool(config) {
   const seen = new Set()
   const cards = []
 
+  console.log('pokewallet queries:', queries)
+  console.log('pokewallet config:', {
+    minPrice: config.minPrice,
+    poolSize: config.poolSize,
+    maxCardsPerQuery: config.maxCardsPerQuery,
+    searchesPerRefresh: config.searchesPerRefresh,
+  })
+
   for (const query of queries) {
     const params = new URLSearchParams({
       q: query,
       page: '1',
       limit: '100',
     })
+
+    console.log('pokewallet requesting query:', query)
+
     const response = await pokewalletRequest(config, `/search?${params}`)
     const data = await response.json()
-    const nextCards = shuffle(data.results ?? [])
-      .map(normalizeCard)
-      .filter((card) => {
-        if (!card || card.price < config.minPrice || seen.has(card.productId)) {
-          return false
-        }
 
-        seen.add(card.productId)
-        return true
-      })
+    console.log('pokewallet raw results count:', query, data.results?.length ?? 0)
 
-    cards.push(...nextCards.slice(0, config.maxCardsPerQuery))
+    const normalizedCards = (data.results ?? []).map(normalizeCard)
+    console.log(
+      'pokewallet normalized count:',
+      query,
+      normalizedCards.filter(Boolean).length,
+    )
+
+    const filteredCards = shuffle(normalizedCards).filter((card) => {
+      if (!card || card.price < config.minPrice || seen.has(card.productId)) {
+        return false
+      }
+
+      seen.add(card.productId)
+      return true
+    })
+
+    console.log('pokewallet filtered count:', query, filteredCards.length)
+
+    cards.push(...filteredCards.slice(0, config.maxCardsPerQuery))
+
+    console.log('pokewallet total cards so far:', cards.length)
 
     if (cards.length >= config.poolSize) {
       break
     }
   }
 
-  if (cards.length < config.poolSize) {
-    throw new Error(
-      `PokeWallet found ${cards.length} priced single cards, but the game needs ${config.poolSize}.`,
-    )
+  if (cards.length === 0) {
+    throw new Error('PokeWallet returned no usable priced single cards.')
   }
 
   return {

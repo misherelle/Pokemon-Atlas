@@ -12,10 +12,14 @@ export default async function handler(request, response) {
   try {
     response.status(200).json(await getCardPool())
   } catch (error) {
+    console.error('pokewallet pool error:', error)
+    console.error('pokewallet pool message:', error?.message)
+    console.error('pokewallet pool stack:', error?.stack)
+
     response.setHeader('Cache-Control', 'no-store')
     response.status(503).json({
       ...getStatus(),
-      error: error.message || 'PokeWallet prices are unavailable.',
+      error: error?.message || 'PokeWallet prices are unavailable.',
     })
   }
 }
