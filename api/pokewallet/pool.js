@@ -1,4 +1,4 @@
-import { getCardPool, getStatus } from './_pokewallet.js'
+import { getCardPool, getPokeWalletErrorDetails, getStatus } from './_pokewallet.js'
 
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
@@ -20,6 +20,7 @@ export default async function handler(request, response) {
     response.status(503).json({
       ...getStatus(),
       error: error?.message || 'PokeWallet prices are unavailable.',
+      ...getPokeWalletErrorDetails(error),
     })
   }
 }

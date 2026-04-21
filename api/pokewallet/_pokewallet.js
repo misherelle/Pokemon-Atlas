@@ -67,6 +67,14 @@ let requestWindow = {
   used: 0,
 }
 
+class PokeWalletRequestError extends Error {
+  constructor(message, upstream) {
+    super(message)
+    this.name = 'PokeWalletRequestError'
+    this.upstream = upstream
+  }
+}
+
 function numberFromEnv(value, fallback) {
   const numberValue = Number(value)
 
@@ -219,6 +227,47 @@ function reserveRequest(config) {
   window.used += 1
 }
 
+function truncateDebugBody(body) {
+  if (!body) {
+    return ''
+  }
+
+  return body.length > 1200 ? `${body.slice(0, 1200)}...` : body
+}
+
+function getBodySummary(body) {
+  if (!body) {
+    return 'No response body.'
+  }
+
+  try {
+    const parsed = JSON.parse(body)
+    return parsed.message || parsed.error || body
+  } catch {
+    return body.replace(/\s+/g, ' ').trim()
+  }
+}
+
+async function buildUpstreamDebug(response, url) {
+  const contentType = response.headers.get('content-type') || ''
+  const body = truncateDebugBody(await response.text().catch(() => ''))
+
+  return {
+    url,
+    status: response.status,
+    statusText: response.statusText,
+    contentType,
+    body,
+    summary: getBodySummary(body),
+    headers: {
+      server: response.headers.get('server'),
+      cfRay: response.headers.get('cf-ray'),
+      rateLimitRemainingHour: response.headers.get('x-ratelimit-remaining-hour'),
+      rateLimitRemainingDay: response.headers.get('x-ratelimit-remaining-day'),
+    },
+  }
+}
+
 export function getPokeWalletConfig(env = processEnv) {
   const cacheMinutes = numberFromEnv(env.POKEWALLET_CACHE_MINUTES, DEFAULT_CACHE_MINUTES)
   const configuredQueries = (env.POKEWALLET_SEARCH_QUERIES || '')
@@ -226,7 +275,7 @@ export function getPokeWalletConfig(env = processEnv) {
     .map((query) => query.trim())
     .filter(Boolean)
   const queryCount = configuredQueries.length || searchQueries.length
-  const apiKey = "pk_live_70d217bc044bcfc6d784fad81e2d4ebe82ecb1f6a80a1bb"
+  const apiKey = cleanApiKey(env.POKEWALLET_API_KEY)
 
   const config = {
     apiKey,
@@ -269,30 +318,42 @@ async function pokewalletRequest(config, path, options = {}) {
 
   reserveRequest(config)
 
-  const response = await fetch(`${POKEWALLET_API_BASE}${path}`, {
+  const url = `${POKEWALLET_API_BASE}${path}`
+  const response = await fetch(url, {
     ...options,
     headers: {
       Accept: options.accept ?? 'application/json',
+      'User-Agent': 'PokemonCardAtlas/1.0',
       'X-API-Key': config.apiKey,
       ...(options.headers ?? {}),
     },
   })
 
-  if (response.status === 429) {
-    throw new Error('PokeWallet rate limit reached. Wait a bit before refreshing.')
+  if (response.ok) {
+    return response
   }
 
-  if (response.status === 401 || response.status === 403) {
-    throw new Error(
-      `PokeWallet rejected this API key (${response.status}). Check that the key is active, saved in Vercel, and included in the latest deployment.`,
+  const upstream = await buildUpstreamDebug(response, url)
+  console.error('pokewallet upstream error:', upstream)
+
+  if (response.status === 429) {
+    throw new PokeWalletRequestError(
+      `PokeWallet rate limit reached. ${upstream.summary}`,
+      upstream,
     )
   }
 
-  if (!response.ok) {
-    throw new Error(`PokeWallet request failed (${response.status}).`)
+  if (response.status === 401 || response.status === 403) {
+    throw new PokeWalletRequestError(
+      `PokeWallet auth failed (${response.status}). ${upstream.summary}`,
+      upstream,
+    )
   }
 
-  return response
+  throw new PokeWalletRequestError(
+    `PokeWallet request failed (${response.status}). ${upstream.summary}`,
+    upstream,
+  )
 }
 
 async function fetchPool(config) {
@@ -443,7 +504,6 @@ export function getStatus(env = processEnv) {
     apiKeyKind: config.apiKeyKind,
     apiKeyLooksValid: config.apiKeyLooksValid,
     apiKeyLength: config.apiKey.length,
-    apiKeyLast6: config.apiKey ? config.apiKey.slice(-6) : null,
     cacheMinutes: config.cacheMinutes,
     maxHourlyRequests: config.maxHourlyRequests,
     searchesPerRefresh: config.searchesPerRefresh,
@@ -453,5 +513,15 @@ export function getStatus(env = processEnv) {
     cachedCards: poolCache?.expiresAt > now ? poolCache.payload.cards.length : 0,
     nextRefreshAt: poolCache?.expiresAt > now ? poolCache.payload.nextRefreshAt : null,
     requestsUsedThisHour: getRateWindow(now).used,
+  }
+}
+
+export function getPokeWalletErrorDetails(error) {
+  if (!error?.upstream) {
+    return {}
+  }
+
+  return {
+    upstream: error.upstream,
   }
 }
