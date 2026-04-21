@@ -442,6 +442,8 @@ export function getStatus(env = processEnv) {
     configured: Boolean(config.apiKey),
     apiKeyKind: config.apiKeyKind,
     apiKeyLooksValid: config.apiKeyLooksValid,
+    apiKeyLength: config.apiKey.length,
+    apiKeyLast6: config.apiKey ? config.apiKey.slice(-6) : null,
     cacheMinutes: config.cacheMinutes,
     maxHourlyRequests: config.maxHourlyRequests,
     searchesPerRefresh: config.searchesPerRefresh,
