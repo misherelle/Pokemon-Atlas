@@ -242,6 +242,12 @@ async function pokewalletRequest(config, path, options = {}) {
     throw new Error('PokeWallet rate limit reached. Wait a bit before refreshing.')
   }
 
+  if (response.status === 401 || response.status === 403) {
+    throw new Error(
+      `PokeWallet rejected this API key (${response.status}). Check that the key is active, saved in Vercel, and included in the latest deployment.`,
+    )
+  }
+
   if (!response.ok) {
     throw new Error(`PokeWallet request failed (${response.status}).`)
   }
