@@ -1,0 +1,24 @@
+.page-hero-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0;
+}
+
+.page-hero-copy h1 {
+  max-width: 10ch;
+}
+
+.section-block p,
+.page-hero-copy p,
+.timeline-card p,
+.info-card p,
+.guide-card p,
+.comparison-card p,
+.rarity-card p,
+.grade-card p,
+.deck-card p {
+  color: var(--text);
+}

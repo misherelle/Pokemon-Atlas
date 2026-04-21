@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bolt-gradient" x1="32" y1="4" x2="32" y2="24" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD84E" />
+      <stop offset="1" stop-color="#F5A400" />
+    </linearGradient>
+    <linearGradient id="fur-gradient" x1="32" y1="13" x2="32" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF26A" />
+      <stop offset="0.55" stop-color="#FFD327" />
+      <stop offset="1" stop-color="#F3A40B" />
+    </linearGradient>
+    <linearGradient id="ear-gradient" x1="14" y1="6" x2="14" y2="33" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE45A" />
+      <stop offset="1" stop-color="#F0A100" />
+    </linearGradient>
+    <linearGradient id="ear-gradient-right" x1="50" y1="6" x2="50" y2="33" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE45A" />
+      <stop offset="1" stop-color="#F0A100" />
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M30 4H43L35 15H42L28 28L32 18H24L30 4Z"
+    fill="url(#bolt-gradient)"
+    stroke="#2F3340"
+    stroke-linejoin="round"
+    stroke-width="2.2"
+  />
+
+  <ellipse
+    cx="15.5"
+    cy="20.5"
+    rx="7.2"
+    ry="16.8"
+    fill="url(#ear-gradient)"
+    stroke="#2F3340"
+    stroke-width="2.2"
+    transform="rotate(-29 15.5 20.5)"
+  />
+  <ellipse
+    cx="49"
+    cy="20.5"
+    rx="7.2"
+    ry="16.8"
+    fill="url(#ear-gradient-right)"
+    stroke="#2F3340"
+    stroke-width="2.2"
+    transform="rotate(29 49 20.5)"
+  />
+
+  <ellipse
+    cx="11.8"
+    cy="10.6"
+    rx="4.2"
+    ry="8.2"
+    fill="#2F3340"
+    transform="rotate(-29 11.8 10.6)"
+  />
+  <ellipse
+    cx="52.2"
+    cy="10.6"
+    rx="4.2"
+    ry="8.2"
+    fill="#2F3340"
+    transform="rotate(29 52.2 10.6)"
+  />
+
+  <circle cx="32" cy="37" r="22.3" fill="url(#fur-gradient)" stroke="#2F3340" stroke-width="2.6" />
+  <ellipse cx="32" cy="40.5" rx="18.2" ry="13.4" fill="#FFD94C" opacity="0.7" />
+  <ellipse cx="32" cy="28" rx="7.4" ry="2.7" fill="#FFF158" opacity="0.95" />
+
+  <circle cx="22.6" cy="33.4" r="5.2" fill="#2F3340" />
+  <circle cx="41.4" cy="33.4" r="5.2" fill="#2F3340" />
+  <circle cx="20.9" cy="31.5" r="1.2" fill="white" />
+  <circle cx="39.7" cy="31.5" r="1.2" fill="white" />
+
+  <ellipse cx="14.8" cy="43.2" rx="5.1" ry="4.8" fill="#FF3B2F" />
+  <ellipse cx="49.2" cy="43.2" rx="5.1" ry="4.8" fill="#FF3B2F" />
+
+  <path
+    d="M27.2 39.4C28.4 38.1 29.9 37.5 32 37.5C34.1 37.5 35.6 38.1 36.8 39.4"
+    stroke="#FFE924"
+    stroke-linecap="round"
+    stroke-width="2.6"
+  />
+  <path
+    d="M29.5 39.8C29.5 42.6 30.6 44 32 44C33.4 44 34.5 42.6 34.5 39.8"
+    stroke="#2F3340"
+    stroke-linecap="round"
+    stroke-width="2.8"
+  />
+  <path
+    d="M26.4 42.2C27 45.1 28.8 46.7 31 46.7"
+    stroke="#2F3340"
+    stroke-linecap="round"
+    stroke-width="2.6"
+  />
+  <path
+    d="M37.6 42.2C37 45.1 35.2 46.7 33 46.7"
+    stroke="#2F3340"
+    stroke-linecap="round"
+    stroke-width="2.6"
+  />
+</svg>
