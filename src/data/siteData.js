@@ -219,27 +219,75 @@ export const ecosystemMetrics = [
 export const rarityCards = [
   {
     label: 'Common',
-    scarcity: 'play first',
-    visual: 24,
-    detail: 'Most accessible tier',
+    scarcity: 'easy to find',
+    visual: 18,
+    detail: 'Basic cards in most packs.',
+    symbol: 'circle',
+    priceNote: 'Usually cheap unless the card is old or graded.',
+  },
+  {
+    label: 'Uncommon',
+    scarcity: 'still common',
+    visual: 32,
+    detail: 'A little less common than basic cards.',
+    symbol: 'diamond',
+    priceNote: 'Usually low price, but popular Pokémon can do better.',
+  },
+  {
+    label: 'Rare',
+    scarcity: 'harder pull',
+    visual: 46,
+    detail: 'A rarer card from the set.',
+    symbol: 'star',
+    priceNote: 'Value depends on Pokémon, set, and condition.',
   },
   {
     label: 'Holo Rare',
-    scarcity: 'classic rare',
-    visual: 48,
-    detail: 'Shine signals status',
+    scarcity: 'shiny rare',
+    visual: 56,
+    detail: 'The picture has foil shine.',
+    symbol: 'foil star',
+    priceNote: 'Older holos can be much more valuable.',
+  },
+  {
+    label: 'Double Rare',
+    scarcity: 'modern ex',
+    visual: 66,
+    detail: 'Often used for modern ex cards.',
+    symbol: 'two black stars',
+    priceNote: 'Usually a good pull, but not always expensive.',
+  },
+  {
+    label: 'Ultra Rare',
+    scarcity: 'full-art pull',
+    visual: 74,
+    detail: 'A flashier card with special art or texture.',
+    symbol: 'varies by era',
+    priceNote: 'Popular characters and clean copies matter most.',
   },
   {
     label: 'Illustration Rare',
-    scarcity: 'modern premium',
-    visual: 78,
-    detail: 'Art drives demand',
+    scarcity: 'art card',
+    visual: 82,
+    detail: 'Full-card artwork, often with a scene.',
+    symbol: 'gold star',
+    priceNote: 'Collectors chase the art, not just play strength.',
+  },
+  {
+    label: 'Special Illustration Rare',
+    scarcity: 'chase card',
+    visual: 92,
+    detail: 'A rarer full-art card with premium art.',
+    symbol: 'two gold stars',
+    priceNote: 'These are often among the biggest modern pulls.',
   },
   {
     label: 'PSA 10',
-    scarcity: 'best condition',
+    scarcity: 'top grade',
     visual: 96,
-    detail: 'Grade changes market meaning',
+    detail: 'Not a rarity, but it means the card graded very clean.',
+    symbol: 'grade label',
+    priceNote: 'Same card, higher price when condition is near perfect.',
   },
 ]
 
@@ -278,11 +326,11 @@ export const deckIdeas = {
     title: 'Collector',
     note: 'Art, rarity, memory, display',
     summary: 'The card matters because it looks good, feels meaningful, or is hard to find.',
-    cards: ['Iconic artwork', 'Set prestige', 'Population'],
+    cards: ['Memorable art', 'Popular sets', 'Low supply'],
     details: [
       { label: 'Looks for', value: 'art + story' },
       { label: 'Keeps it for', value: 'display value' },
-      { label: 'Watches', value: 'grade + scarcity' },
+      { label: 'Watches', value: 'grade + supply' },
     ],
   },
   player: {
@@ -298,9 +346,9 @@ export const deckIdeas = {
   },
   investor: {
     title: 'Market',
-    note: 'Recent sales, timing, scarcity',
+    note: 'Recent sales, timing, supply',
     summary: 'The card matters because recent sales suggest what someone might pay next.',
-    cards: ['Recent sales', 'Timing', 'Scarcity'],
+    cards: ['Recent sales', 'Timing', 'Supply'],
     details: [
       { label: 'Looks for', value: 'sale comps' },
       { label: 'Keeps it for', value: 'future price' },
@@ -325,15 +373,43 @@ export const recordSales = {
 export const comparisonPoints = [
   {
     label: 'Common',
-    detail: 'easy pull • low price • gameplay utility',
+    detail: 'Easy to pull. Usually cheap.',
+  },
+  {
+    label: 'Uncommon',
+    detail: 'Still easy to find, but a little less common.',
   },
   {
     label: 'Rare',
-    detail: 'better art cues • higher attention • more chase',
+    detail: 'Harder to pull. Usually worth more than common cards.',
+  },
+  {
+    label: 'Holo Rare',
+    detail: 'Has a shiny foil picture. Older holos can be popular.',
+  },
+  {
+    label: 'Reverse Holo',
+    detail: 'The card background is shiny instead of the picture.',
+  },
+  {
+    label: 'Ultra Rare',
+    detail: 'Includes cards like ex, V, VMAX, and GX.',
+  },
+  {
+    label: 'Illustration Rare',
+    detail: 'Full-art card. People often collect these for the artwork.',
+  },
+  {
+    label: 'Special Illustration Rare',
+    detail: 'A rarer full-art card. These can get expensive fast.',
+  },
+  {
+    label: 'Promo',
+    detail: 'Given out through events, products, or special releases.',
   },
   {
     label: 'PSA 10',
-    detail: 'same card text • different market tier',
+    detail: 'A top grade. Same card, much higher price.',
   },
 ]
 
@@ -407,7 +483,7 @@ export const topValueCards2026 = [
     year: '1998 Japanese Promo',
     value: '$16.492M',
     population: '1 PSA 10',
-    details: 'Goldin auction record in Feb. 2026 • roughly 39 total copies noted',
+    details: 'Goldin auction record in Feb. 2026; about 39 total copies noted',
     imageLabel: 'Pikachu Illustrator',
     imageSrc: '/images/pikachu-card.png',
     imageAlt: 'PSA-graded Pikachu Illustrator card in a slab',
@@ -418,7 +494,7 @@ export const topValueCards2026 = [
     year: '1999',
     value: '$550K',
     population: '124 PSA 10',
-    details: 'Late-2025 Heritage sale keeps it at blue-chip status',
+    details: 'Late-2025 Heritage sale set a new record for the card',
     imageLabel: '1st Edition Charizard',
     imageSrc: '/images/charizard-card.png',
     imageAlt: '1999 Base Set 1st Edition Charizard card',
@@ -429,7 +505,7 @@ export const topValueCards2026 = [
     year: '2000',
     value: 'high 6 figures',
     population: '40-50 PSA 10',
-    details: 'One of the strongest early-holo demand cards',
+    details: 'Early holo with strong demand in top grade',
     imageLabel: 'Neo Genesis Lugia',
     imageSrc: '/images/lugia-card.png',
     imageAlt: '2000 Neo Genesis 1st Edition Lugia card',
@@ -440,7 +516,7 @@ export const topValueCards2026 = [
     year: '1999',
     value: '$88K-$138K',
     population: '~100 PSA 10',
-    details: 'Classic starter prestige with durable collector demand',
+    details: 'Classic starter card with a small PSA 10 pool',
     imageLabel: '1st Edition Blastoise',
     imageSrc: '/images/blastoise-card.png',
     imageAlt: '1999 Base Set 1st Edition Blastoise card',
@@ -473,7 +549,7 @@ export const topValueCards2026 = [
     year: '2005',
     value: '$49K',
     population: '1 in 72 packs',
-    details: 'EX Deoxys pull difficulty helps sustain interest',
+    details: 'Hard pull rate keeps top copies expensive',
     imageLabel: 'Rayquaza Gold Star',
     imageSrc: '/images/rayquaza-card.png',
     imageAlt: '2005 Rayquaza Gold Star card',
@@ -484,7 +560,7 @@ export const topValueCards2026 = [
     year: '2007',
     value: '$48.5K',
     population: 'under 100 PSA 10',
-    details: 'POP Series 5 plus Eeveelution demand makes it a collector magnet',
+    details: 'POP Series 5 card with strong Eeveelution appeal',
     imageLabel: 'Umbreon Gold Star',
     imageSrc: '/images/umbreon-card.png',
     imageAlt: '2007 Umbreon Gold Star card',
@@ -525,10 +601,39 @@ export const cardCaseStudies = [
       'Record sale card',
       'PSA 10 is effectively unique',
     ],
+    priceHistory: [
+      {
+        label: '2016',
+        value: 54970,
+        note: 'Heritage public auction',
+      },
+      {
+        label: '2019',
+        value: 195000,
+        note: 'PSA 9 Weiss auction',
+      },
+      {
+        label: '2020',
+        value: 233000,
+        note: 'PSA 9 ZenMarket sale',
+      },
+      {
+        label: '2021',
+        value: 5275000,
+        display: '$5.275M',
+        note: 'PSA 10 private sale',
+      },
+      {
+        label: '2026',
+        value: 16492000,
+        display: '$16.492M',
+        note: 'PSA 10 Goldin auction',
+      },
+    ],
     market: [
       { label: 'Peak sale', value: '$16.492M' },
-      { label: 'Known for', value: 'rarity' },
-      { label: 'Price reason', value: 'rarity + grade' },
+      { label: 'Known for', value: 'contest promo' },
+      { label: 'Why pricey', value: 'rarity + grade' },
     ],
   },
   {
@@ -542,10 +647,34 @@ export const cardCaseStudies = [
       '124 PSA 10 noted in article',
       'Late-2025 sale hit $550K',
     ],
+    priceHistory: [
+      {
+        label: '2017',
+        value: 19000,
+        display: '< $20K',
+        note: 'Card Ladder note via cllct',
+      },
+      {
+        label: '2021',
+        value: 310000,
+        display: '$310K+',
+        note: 'Pandemic-era public sale range',
+      },
+      {
+        label: '2022',
+        value: 420000,
+        note: 'Previous public record',
+      },
+      {
+        label: '2025',
+        value: 550000,
+        note: 'Heritage public record',
+      },
+    ],
     market: [
       { label: 'Peak sale', value: '$550K' },
-      { label: 'Known for', value: 'nostalgia' },
-      { label: 'Price reason', value: 'icon status' },
+      { label: 'Known for', value: 'Base Set' },
+      { label: 'Why pricey', value: 'icon status' },
     ],
   },
   {
@@ -559,10 +688,28 @@ export const cardCaseStudies = [
       'Under 100 PSA 10 noted in article',
       'Recent sale around $48.5K',
     ],
+    priceHistory: [
+      {
+        label: '2019',
+        value: 1934,
+        note: 'PSA 10 eBay auction',
+      },
+      {
+        label: '2021',
+        value: 15100,
+        note: 'PSA 10 eBay auction',
+      },
+      {
+        label: '2025',
+        value: 48500,
+        display: '$48.5K',
+        note: 'Sports Card Investor last sale',
+      },
+    ],
     market: [
       { label: 'Peak sale', value: '$48.5K' },
       { label: 'Known for', value: 'low pop' },
-      { label: 'Price reason', value: 'Gold Star tier' },
+      { label: 'Why pricey', value: 'Gold Star' },
     ],
   },
 ]
@@ -664,8 +811,24 @@ export const sourceLinks = {
       href: 'https://www.guinnessworldrecords.com/world-records/452634-most-expensive-pokemon-trading-card-sold-at-auction',
     },
     {
-      label: 'Yahoo Finance / Athlon top-10 cards in 2026',
-      href: 'https://finance.yahoo.com/news/top-10-most-valuable-pok-235612525.html',
+      label: 'Athlon top-10 cards in 2026',
+      href: 'https://athlonsports.com/collectibles/top-10-most-valuable-pokemon-cards-2026',
+    },
+    {
+      label: 'Heritage Charizard sale',
+      href: 'https://www.ha.com/heritage-auctions-press-releases-and-news/-550-000-psa-10-charizard-breaks-record-leads-all-time-high-5.27-million-total-at-heritage-trading-card-games-auction.s?releaseId=5371',
+    },
+    {
+      label: 'PokeGuardian Pikachu Illustrator 2019 sale',
+      href: 'https://www.pokeguardian.com/365525_pikachu-illustrator-pokemon-card-psa-9-sold-on-auction-for-195-000',
+    },
+    {
+      label: 'PSA Umbreon auction result',
+      href: 'https://www.psacard.com/auctionprices/tcg-cards/2007-pokemon-pop-series-5/umbreon-gold-star/auction/-1985141528661291153',
+    },
+    {
+      label: 'Sports Card Investor Umbreon price guide',
+      href: 'https://www.sportscardinvestor.com/cards/umbreon-star-pokemon/2007-pop-series-5-holo-17-17/psa-7',
     },
   ],
 }

@@ -1,40 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-const localCards = [
-  {
-    productId: 'local-pikachu',
-    name: 'Pikachu Illustrator',
-    setName: '1998 Japanese Promo',
-    imageUrl: '/images/pikachu-card.png',
-    price: 16492000,
-    url: 'https://www.tcgplayer.com/search/pokemon/product?productLineName=pokemon&q=pikachu%20illustrator',
-  },
-  {
-    productId: 'local-charizard',
-    name: 'Charizard Base Set 1st Edition',
-    setName: 'Base Set',
-    imageUrl: '/images/charizard-card.png',
-    price: 550000,
-    url: 'https://www.tcgplayer.com/search/pokemon/product?productLineName=pokemon&q=charizard%20base%20set%201st%20edition',
-  },
-  {
-    productId: 'local-lugia',
-    name: 'Lugia Neo Genesis 1st Edition',
-    setName: 'Neo Genesis',
-    imageUrl: '/images/lugia-card.png',
-    price: 180000,
-    url: 'https://www.tcgplayer.com/search/pokemon/product?productLineName=pokemon&q=lugia%20neo%20genesis%201st%20edition',
-  },
-  {
-    productId: 'local-rayquaza',
-    name: 'Rayquaza Gold Star',
-    setName: 'EX Deoxys',
-    imageUrl: '/images/rayquaza-card.png',
-    price: 49000,
-    url: 'https://www.tcgplayer.com/search/pokemon/product?productLineName=pokemon&q=rayquaza%20gold%20star',
-  },
-]
-
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
@@ -53,23 +18,31 @@ function formatPrice(price) {
   return currencyFormatter.format(price)
 }
 
-function makeLocalRound() {
-  const shuffled = [...localCards].sort(() => Math.random() - 0.5)
+function pickCardPair(pool) {
+  const shuffled = [...pool].sort(() => Math.random() - 0.5)
+  const pair = shuffled.slice(0, 2)
 
-  return {
-    source: 'demo',
-    notice: 'Demo prices are showing until TCGplayer API credentials are set.',
-    cards: shuffled.slice(0, 2),
+  if (pair.length === 2 && pair[0].price !== pair[1].price) {
+    return pair
   }
+
+  const alternate = shuffled.find(
+    (card) => card.productId !== pair[0]?.productId && card.price !== pair[0]?.price,
+  )
+
+  return alternate && pair[0] ? [pair[0], alternate] : pair
 }
 
 function PriceGuessPage() {
   const [cards, setCards] = useState([])
-  const [source, setSource] = useState('demo')
+  const [cardPool, setCardPool] = useState([])
+  const [poolMeta, setPoolMeta] = useState(null)
   const [notice, setNotice] = useState('')
+  const [apiError, setApiError] = useState('')
   const [selectedId, setSelectedId] = useState(null)
   const [isCorrect, setIsCorrect] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [minPrice, setMinPrice] = useState(20)
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
   const [rounds, setRounds] = useState(0)
@@ -82,38 +55,59 @@ function PriceGuessPage() {
     return cards[0].price >= cards[1].price ? cards[0] : cards[1]
   }, [cards])
 
-  const loadRound = useCallback(async () => {
+  const loadPool = useCallback(async () => {
     setIsLoading(true)
     setSelectedId(null)
     setIsCorrect(null)
+    setApiError('')
 
     try {
-      const response = await fetch('/api/tcgplayer/round')
+      const response = await fetch('/api/pokewallet/pool')
+      const data = await response.json().catch(() => ({}))
 
       if (!response.ok) {
-        throw new Error('Round request failed.')
+        setMinPrice(data.minPrice ?? 20)
+        throw new Error(data.error || 'PokeWallet prices are unavailable.')
       }
 
-      const data = await response.json()
-      const nextCards = data.cards?.length === 2 ? data.cards : makeLocalRound().cards
+      if (!Array.isArray(data.cards) || data.cards.length < 2) {
+        throw new Error('PokeWallet did not find two cards for this round. Try again.')
+      }
 
-      setCards(nextCards)
-      setSource(data.source ?? 'demo')
+      setCardPool(data.cards)
+      setCards(pickCardPair(data.cards))
+      setPoolMeta(data)
+      setMinPrice(data.minPrice ?? 20)
       setNotice(data.notice ?? '')
-    } catch {
-      const fallback = makeLocalRound()
-
-      setCards(fallback.cards)
-      setSource(fallback.source)
-      setNotice(fallback.notice)
+    } catch (error) {
+      setCards([])
+      setCardPool([])
+      setPoolMeta(null)
+      setNotice('')
+      setApiError(error.message || 'PokeWallet prices are unavailable.')
     } finally {
       setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    loadRound()
-  }, [loadRound])
+    loadPool()
+  }, [loadPool])
+
+  function loadNextPair() {
+    setSelectedId(null)
+    setIsCorrect(null)
+
+    if (
+      !cardPool.length ||
+      (poolMeta?.nextRefreshAt && Date.now() >= Date.parse(poolMeta.nextRefreshAt))
+    ) {
+      loadPool()
+      return
+    }
+
+    setCards(pickCardPair(cardPool))
+  }
 
   function handleGuess(card) {
     if (selectedId || !higherCard) {
@@ -137,6 +131,11 @@ function PriceGuessPage() {
           <h1>Price Guess</h1>
           <p className="hero-body">Pick the Pokémon card with the higher market value.</p>
         </div>
+        <img
+          className="price-guess-hero-art"
+          src="/images/piplup-gradient.png"
+          alt="Piplup gradient illustration"
+        />
       </section>
 
       <section className="price-game-panel" aria-label="Price Guess game">
@@ -152,63 +151,88 @@ function PriceGuessPage() {
           </div>
         </div>
 
-        {notice ? <p className="price-game-note">{notice}</p> : null}
+        {notice ? (
+          <p className="price-game-note">{notice}</p>
+        ) : null}
 
-        <div className="price-card-grid">
-          {(cards.length === 2 ? cards : [null, null]).map((card, index) => {
-            if (!card) {
+        {apiError && cards.length !== 2 ? (
+          <div className="price-game-error" role="status">
+            <strong>
+              {apiError.includes('not configured')
+                ? 'Live PokeWallet prices are not connected yet.'
+                : 'Could not load a card pair.'}
+            </strong>
+            <p>{apiError}</p>
+            {apiError.includes('not configured') ? (
+              <p>
+                Add POKEWALLET_API_KEY to your local env or Vercel Environment Variables,
+                then retry.
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <div className="price-card-grid">
+            {(cards.length === 2 ? cards : [null, null]).map((card, index) => {
+              if (!card) {
+                return (
+                  <div key={`loading-${index}`} className="price-card is-loading">
+                    Loading card...
+                  </div>
+                )
+              }
+
+              const isSelected = selectedId === card.productId
+              const isWinner = higherCard?.productId === card.productId
+              const isRevealed = selectedId != null
+              const cardClass = [
+                'price-card',
+                isSelected ? 'is-selected' : '',
+                isRevealed && isWinner ? 'is-winner' : '',
+                isRevealed && isSelected && !isWinner ? 'is-loser' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')
+              const cardMeta = [card.rarity, card.printing].filter(Boolean).join(' / ')
+
               return (
-                <div key={`loading-${index}`} className="price-card is-loading">
-                  Loading card...
-                </div>
-              )
-            }
-
-            const isSelected = selectedId === card.productId
-            const isWinner = higherCard?.productId === card.productId
-            const isRevealed = selectedId != null
-            const cardClass = [
-              'price-card',
-              isSelected ? 'is-selected' : '',
-              isRevealed && isWinner ? 'is-winner' : '',
-              isRevealed && isSelected && !isWinner ? 'is-loser' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')
-
-            return (
-              <button
-                key={card.productId}
-                type="button"
-                className={cardClass}
-                disabled={isLoading || isRevealed}
-                onClick={() => handleGuess(card)}
-              >
-                <span className="price-card-image-wrap">
-                  <img src={card.imageUrl} alt={card.name} className="price-card-image" />
-                </span>
-                <span className="price-card-copy">
-                  <span className="price-card-set">{card.setName}</span>
-                  <strong>{card.name}</strong>
-                  <span className="price-card-price">
-                    {isRevealed ? formatPrice(card.price) : 'Tap to choose'}
+                <button
+                  key={card.productId}
+                  type="button"
+                  className={cardClass}
+                  disabled={isLoading || isRevealed}
+                  onClick={() => handleGuess(card)}
+                >
+                  <span className="price-card-image-wrap">
+                    <img src={card.imageUrl} alt={card.name} className="price-card-image" />
                   </span>
-                </span>
-              </button>
-            )
-          })}
-        </div>
+                  <span className="price-card-copy">
+                    <span className="price-card-set">{card.setName}</span>
+                    <strong>{card.name}</strong>
+                    {cardMeta ? <span className="price-card-meta">{cardMeta}</span> : null}
+                    <span className="price-card-price">
+                      {isRevealed ? formatPrice(card.price) : 'Choose this card'}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         <div className="price-game-actions">
           <button
             type="button"
             className="price-game-next"
-            onClick={loadRound}
+            onClick={cards.length === 2 ? loadNextPair : loadPool}
             disabled={isLoading}
           >
-            {selectedId ? 'Next pair' : 'Skip pair'}
+            {selectedId ? 'Next pair' : cards.length === 2 ? 'Skip pair' : 'Retry'}
           </button>
-          <span>{source === 'tcgplayer' ? 'Prices via TCGplayer' : 'Demo mode'}</span>
+          <span>
+            Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
+            other. Refreshes every {poolMeta?.cacheMinutes ?? 10} min. Above{' '}
+            {formatPrice(minPrice)}. Source: PokeWallet API.
+          </span>
         </div>
 
         {isCorrect != null ? (

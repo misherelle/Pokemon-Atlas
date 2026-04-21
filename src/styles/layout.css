@@ -491,11 +491,13 @@
   width: clamp(170px, 20vw, 300px);
 }
 
-.card-files-hero {
+.card-files-hero,
+.price-guess-hero {
   grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
 }
 
-.card-files-hero-art {
+.card-files-hero-art,
+.price-guess-hero-art {
   justify-self: end;
   width: clamp(190px, 24vw, 330px);
   max-height: 330px;
@@ -508,13 +510,15 @@
   .page-hero,
   .hero-metrics,
   .section-intro.has-media,
-  .card-files-hero {
+  .card-files-hero,
+  .price-guess-hero {
     grid-template-columns: 1fr;
   }
 
   .landing-hero-art,
   .section-intro-art,
-  .card-files-hero-art {
+  .card-files-hero-art,
+  .price-guess-hero-art {
     justify-self: center;
   }
 
@@ -538,13 +542,59 @@
   .site-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
     top: 8px;
     padding: 12px;
+    margin-bottom: 18px;
+  }
+
+  .site-nav {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .site-nav a {
+    flex: 1 1 92px;
+    padding: 10px 9px;
+    font-size: 0.86rem;
+    text-align: center;
   }
 
   .landing-hero,
   .page-hero,
   .section-block {
     padding: 20px;
+    border-radius: 24px;
+  }
+
+  .landing-hero {
+    gap: 16px;
+  }
+
+  .landing-copy h1,
+  .page-hero-copy h1,
+  .section-intro h2 {
+    max-width: 11ch;
+  }
+
+  .hero-body {
+    max-width: 100%;
+    font-size: 1.08rem;
+  }
+
+  .price-guess-hero-art,
+  .card-files-hero-art {
+    width: min(260px, 74vw);
+    max-height: 260px;
+  }
+
+  .hero-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card,
+  .page-hero-note {
+    border-radius: 18px;
+    padding: 14px;
   }
 }

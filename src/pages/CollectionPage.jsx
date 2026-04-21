@@ -18,8 +18,8 @@ function CollectionPage() {
         title="Collecting"
         body="How rarity and condition affect value."
         highlights={[
-          { label: 'Basic tier', value: 'Common', note: 'Cards most players see first', tone: 'cool' },
-          { label: 'Rare art', value: 'Illustration Rare', note: 'Artwork people look for', tone: 'soft' },
+          { label: 'Easy find', value: 'Common', note: 'Cards most players see first', tone: 'cool' },
+          { label: 'Art card', value: 'Illustration Rare', note: 'Artwork people look for', tone: 'soft' },
           { label: 'Top grade', value: 'PSA 10', note: 'Condition changes price', tone: 'warm' },
         ]}
       />
@@ -27,7 +27,7 @@ function CollectionPage() {
       <SectionBlock
         eyebrow="Rarity"
         title="Rarity"
-        body="How the game marks harder-to-find cards."
+        body="Rarity tells you how hard a card is to pull. Condition is separate, but it also changes price."
       >
         <div className="rarity-stack">
           {rarityCards.map((card) => (
@@ -43,6 +43,16 @@ function CollectionPage() {
                 />
               </div>
               <p>{card.detail}</p>
+              <div className="rarity-detail-grid">
+                <div>
+                  <span>Marker</span>
+                  <strong>{card.symbol}</strong>
+                </div>
+                <div>
+                  <span>Price note</span>
+                  <strong>{card.priceNote}</strong>
+                </div>
+              </div>
             </article>
           ))}
         </div>
@@ -68,8 +78,8 @@ function CollectionPage() {
 
       <SectionBlock
         eyebrow="Compare"
-        title="Same card, different value"
-        body="Rarity and condition can change how people price a card."
+        title="What changes the price"
+        body="Different card types, artwork, and condition can all change value."
       >
         <div className="comparison-grid">
           {comparisonPoints.map((item) => (
@@ -82,8 +92,8 @@ function CollectionPage() {
       </SectionBlock>
 
       <SectionBlock
-        eyebrow="Views"
-        title="Different ways to collect"
+        eyebrow="Types"
+        title="How people collect"
         body="Collectors, players, and buyers look for different things."
       >
         <div className="toggle-row" role="tablist" aria-label="Collector mode">

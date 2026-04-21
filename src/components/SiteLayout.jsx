@@ -84,15 +84,6 @@ function SiteLayout({ children, route }) {
                 <span>{item.label}</span>
               </a>
             ))}
-            <button
-              type="button"
-              className="retro-side-button is-utility"
-              aria-label="Back to top"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              <strong>&uarr; TOP</strong>
-              <span>Back up</span>
-            </button>
             {nextPage && (
               <a href={nextPage.href} className="retro-side-button is-arrow" aria-label={`Go to ${nextPage.label}`}>
                 <strong>NEXT &rarr;</strong>
