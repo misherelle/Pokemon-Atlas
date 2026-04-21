@@ -226,7 +226,7 @@ export function getPokeWalletConfig(env = processEnv) {
     .map((query) => query.trim())
     .filter(Boolean)
   const queryCount = configuredQueries.length || searchQueries.length
-  const apiKey = cleanApiKey(env.POKEWALLET_API_KEY)
+  const apiKey = "pk_live_70d217bc044bcfc6d784fad81e2d4ebe82ecb1f6a80a1bb"
 
   const config = {
     apiKey,
