@@ -201,7 +201,7 @@ export const productionTotals = [
 ]
 
 export const annualProduction = [
-  { year: '2020', added: 1.6 },
+  { year: '2020', added: 3.1 },
   { year: '2021', added: 3.7 },
   { year: '2022', added: 9.1 },
   { year: '2023', added: 9.7 },
@@ -225,7 +225,7 @@ export const rarityCards = [
   },
   {
     label: 'Holo Rare',
-    scarcity: 'classic chase',
+    scarcity: 'classic rare',
     visual: 48,
     detail: 'Shine signals status',
   },
@@ -237,7 +237,7 @@ export const rarityCards = [
   },
   {
     label: 'PSA 10',
-    scarcity: 'condition premium',
+    scarcity: 'best condition',
     visual: 96,
     detail: 'Grade changes market meaning',
   },
@@ -277,7 +277,7 @@ export const deckIdeas = {
   collector: {
     title: 'Collector',
     note: 'Art, rarity, memory, display',
-    summary: 'The card is treated like an object with visual pull and long-term meaning.',
+    summary: 'The card matters because it looks good, feels meaningful, or is hard to find.',
     cards: ['Iconic artwork', 'Set prestige', 'Population'],
     details: [
       { label: 'Looks for', value: 'art + story' },
@@ -298,13 +298,13 @@ export const deckIdeas = {
   },
   investor: {
     title: 'Market',
-    note: 'Liquidity, comps, timing',
-    summary: 'The card is read as a market signal, with attention on price history and exit potential.',
-    cards: ['Comp sales', 'Timing', 'Scarcity'],
+    note: 'Recent sales, timing, scarcity',
+    summary: 'The card matters because recent sales suggest what someone might pay next.',
+    cards: ['Recent sales', 'Timing', 'Scarcity'],
     details: [
       { label: 'Looks for', value: 'sale comps' },
-      { label: 'Keeps it for', value: 'price upside' },
-      { label: 'Watches', value: 'market heat' },
+      { label: 'Keeps it for', value: 'future price' },
+      { label: 'Watches', value: 'recent sales' },
     ],
   },
 }
@@ -516,7 +516,7 @@ export const topValueCards2026 = [
 export const cardCaseStudies = [
   {
     name: 'Pikachu Illustrator',
-    subtitle: 'Auction ceiling card',
+    subtitle: 'Highest sale card',
     imageLabel: 'Pikachu Illustrator PSA 10',
     imageSrc: '/images/pikachu-card.png',
     imageAlt: 'PSA-graded Pikachu Illustrator card in a slab',
@@ -527,13 +527,13 @@ export const cardCaseStudies = [
     ],
     market: [
       { label: 'Peak sale', value: '$16.492M' },
-      { label: 'Read as', value: 'cultural icon' },
-      { label: 'Value driver', value: 'rarity + grade' },
+      { label: 'Known for', value: 'rarity' },
+      { label: 'Price reason', value: 'rarity + grade' },
     ],
   },
   {
     name: 'Base Set Charizard 1st Edition',
-    subtitle: 'Blue-chip benchmark',
+    subtitle: 'Classic Charizard',
     imageLabel: '1st Edition Charizard',
     imageSrc: '/images/charizard-card.png',
     imageAlt: '1999 Base Set 1st Edition Charizard card',
@@ -544,13 +544,13 @@ export const cardCaseStudies = [
     ],
     market: [
       { label: 'Peak sale', value: '$550K' },
-      { label: 'Read as', value: 'nostalgia anchor' },
-      { label: 'Value driver', value: 'icon status' },
+      { label: 'Known for', value: 'nostalgia' },
+      { label: 'Price reason', value: 'icon status' },
     ],
   },
   {
     name: 'Umbreon Gold Star',
-    subtitle: 'Low-pop chase example',
+    subtitle: 'Low-pop card',
     imageLabel: 'Umbreon Gold Star',
     imageSrc: '/images/umbreon-card.png',
     imageAlt: '2007 Umbreon Gold Star card',
@@ -561,8 +561,8 @@ export const cardCaseStudies = [
     ],
     market: [
       { label: 'Peak sale', value: '$48.5K' },
-      { label: 'Read as', value: 'low-pop chase' },
-      { label: 'Value driver', value: 'Gold Star tier' },
+      { label: 'Known for', value: 'low pop' },
+      { label: 'Price reason', value: 'Gold Star tier' },
     ],
   },
 ]

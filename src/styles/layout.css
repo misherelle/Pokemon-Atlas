@@ -314,11 +314,12 @@
 
 .landing-hero {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 0.86fr) minmax(280px, 0.64fr);
   gap: 18px;
   padding: clamp(24px, 4vw, 40px);
   position: relative;
   overflow: hidden;
+  align-items: center;
   background: linear-gradient(90deg, rgba(172, 192, 249, 0.34), rgba(253, 241, 237, 0.72));
 }
 
@@ -336,6 +337,8 @@
   display: grid;
   gap: 14px;
   align-content: start;
+  position: relative;
+  z-index: 1;
 }
 
 .landing-copy h1 {
@@ -347,18 +350,14 @@
   font-size: 1.25rem;
 }
 
-.hero-quick-links {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.hero-quick-links a {
-  padding: 11px 15px;
-  border-radius: 999px;
-  background: var(--panel-soft);
-  color: var(--heading);
-  font-weight: 600;
+.landing-hero-art {
+  position: relative;
+  z-index: 1;
+  justify-self: end;
+  width: clamp(260px, 32vw, 460px);
+  max-height: 520px;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 34px rgba(80, 66, 138, 0.11));
 }
 
 .hero-metrics {
@@ -466,15 +465,61 @@
   margin-bottom: 18px;
 }
 
+.section-intro > div {
+  display: grid;
+  gap: 10px;
+}
+
+.section-intro.has-media {
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 320px);
+  align-items: center;
+}
+
 .section-intro h2 {
   max-width: 10ch;
+}
+
+.section-intro-art {
+  justify-self: end;
+  width: clamp(150px, 18vw, 260px);
+  max-height: 250px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 28px rgba(80, 66, 138, 0.1));
+}
+
+.path-section-art {
+  width: clamp(170px, 20vw, 300px);
+}
+
+.card-files-hero {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 340px);
+}
+
+.card-files-hero-art {
+  justify-self: end;
+  width: clamp(190px, 24vw, 330px);
+  max-height: 330px;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 32px rgba(80, 66, 138, 0.11));
 }
 
 @media (max-width: 960px) {
   .landing-hero,
   .page-hero,
-  .hero-metrics {
+  .hero-metrics,
+  .section-intro.has-media,
+  .card-files-hero {
     grid-template-columns: 1fr;
+  }
+
+  .landing-hero-art,
+  .section-intro-art,
+  .card-files-hero-art {
+    justify-self: center;
+  }
+
+  .landing-hero-art {
+    max-height: 360px;
   }
 }
 

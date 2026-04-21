@@ -8,7 +8,16 @@
 }
 
 .page-hero-copy h1 {
-  max-width: 10ch;
+  max-width: 14ch;
+}
+
+.compact-hero:not(.card-files-hero) .page-hero-copy h1,
+.section-intro:not(.has-media) h2 {
+  max-width: 18ch;
+}
+
+.section-intro:not(.has-media) p {
+  max-width: 64ch;
 }
 
 .section-block p,

@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 
 const categoryColors = {
-  franchise: '#6f5ef9',
-  tcg: '#8b78ff',
-  media: '#ff8ea1',
-  company: '#69c7e6',
-  global: '#ffc857',
-  digital: '#4ca8ff',
-  product: '#61d6c8',
-  market: '#ff6f91',
+  franchise: '#5631c7',
+  tcg: '#e15bff',
+  media: '#ff8a5f',
+  company: '#35b7dc',
+  global: '#ffc44f',
+  digital: '#008cff',
+  product: '#37ccb1',
+  market: '#ff4f8f',
 }
 
 const categoryLabels = {
@@ -401,6 +401,14 @@ function stemPath(event, stemY2) {
   const railExitY = event.lineY + direction * 26
   const cardApproachY = stemY2 - direction * 16
 
+  if (event.title === 'Anime launches in the U.S.') {
+    const sideX = event.cardCenterX - event.cardWidth / 2 - 42
+    const entryX = event.cardCenterX - event.cardWidth / 2 + 24
+    const midY = (railExitY + cardApproachY) / 2
+
+    return `M ${anchorX} ${event.lineY} C ${anchorX} ${railExitY}, ${sideX} ${railExitY}, ${sideX} ${midY} C ${sideX} ${cardApproachY}, ${entryX} ${cardApproachY}, ${entryX} ${stemY2}`
+  }
+
   return `M ${anchorX} ${event.lineY} C ${anchorX} ${railExitY}, ${anchorX} ${railExitY}, ${anchorX} ${railExitY} C ${anchorX} ${cardApproachY}, ${event.cardCenterX} ${cardApproachY}, ${event.cardCenterX} ${stemY2}`
 }
 
@@ -423,13 +431,15 @@ function buildLayout(events) {
   const leftPad = 136
   const rightPad = width - leftPad
   const cardHeight = 76
-  const stemGap = 54
-  const minLabelGap = 42
-  const labelLaneGap = 132
-  const minDotDistance = 66
-  const topPad = 318
-  const rowPitch = 500
+  const stemGap = 66
+  const minLabelGap = 58
+  const labelLaneGap = 146
+  const minDotDistance = 82
+  const topPad = 236
+  const rowPitch = 520
   const bottomPad = 152
+  const yearLabelOffsetX = 38
+  const yearLabelOffsetY = 46
 
   const rows = timelineRows.map((timelineRow, index) => ({
     ...timelineRow,
@@ -502,9 +512,9 @@ function buildLayout(events) {
         key: `${row.index}-start`,
         year: row.startYear,
         tickX: isLeftSide ? leftPad : rightPad,
-        x: isLeftSide ? leftPad - 68 : rightPad + 68,
+        x: isLeftSide ? leftPad - yearLabelOffsetX : rightPad + yearLabelOffsetX,
         lineY: row.lineY,
-        labelY: row.lineY - 44,
+        labelY: row.lineY + yearLabelOffsetY,
         textAnchor: isLeftSide ? 'end' : 'start',
       }
     }),
@@ -512,9 +522,12 @@ function buildLayout(events) {
       key: `${rows.at(-1).index}-final`,
       year: rows.at(-1).endYear,
       tickX: rows.at(-1).direction === 'forward' ? rightPad : leftPad,
-      x: rows.at(-1).direction === 'forward' ? rightPad + 68 : leftPad - 68,
+      x:
+        rows.at(-1).direction === 'forward'
+          ? rightPad + yearLabelOffsetX
+          : leftPad - yearLabelOffsetX,
       lineY: rows.at(-1).lineY,
-      labelY: rows.at(-1).lineY - 44,
+      labelY: rows.at(-1).lineY + yearLabelOffsetY,
       textAnchor: rows.at(-1).direction === 'forward' ? 'start' : 'end',
     },
   ]
@@ -525,6 +538,7 @@ function buildLayout(events) {
       lineY: row.lineY,
       label: row.label,
       labelY: row.lineY - 54,
+      slashCount: Math.max(1, Math.round((row.endYear - row.startYear) / 2)),
     }))
   const maxCardBottom = positionedEvents.reduce(
     (bottom, event) => Math.max(bottom, event.cardY + cardHeight),
@@ -568,20 +582,13 @@ function getHorizontalAlign(event, width) {
 
 function HistoryTimeline({ events }) {
   const layout = useMemo(() => buildLayout(events), [events])
+  const legendEntries = Object.entries(categoryLabels)
   const [activeId, setActiveId] = useState(null)
   const activeEvent = activeId ? layout.eventsById.get(activeId) ?? null : null
   const popupAlign =
     activeEvent == null
       ? null
       : getHorizontalAlign(activeEvent, layout.width)
-
-  const surfaceStyle =
-    activeEvent == null
-      ? undefined
-      : {
-          '--timeline-glow-x': `${(getEventAnchorX(activeEvent) / layout.width) * 100}%`,
-          '--timeline-glow-y': `${(activeEvent.dotY / layout.height) * 100}%`,
-        }
 
   const popupStyle =
     activeEvent == null
@@ -595,30 +602,45 @@ function HistoryTimeline({ events }) {
     <div className="timeline-rail">
       <div className="timeline-poster">
         <div className="timeline-poster-head">
-          <p>Two-year map</p>
-          <span>Slashes mark the quiet stretch; hover any card for the note.</span>
+          <p>Timeline guide</p>
+          <span>Hover cards for details.</span>
         </div>
 
         <div className="timeline-legend" aria-label="Timeline color legend">
-          {Object.entries(categoryLabels).map(([category, label]) => (
-            <div key={category} className="timeline-legend-item">
-              <span
-                className="timeline-legend-dot"
-                style={{ backgroundColor: categoryColors[category] }}
-                aria-hidden="true"
-              />
-              <span>{label}</span>
+          <div className="timeline-legend-row">
+            {legendEntries.slice(0, 4).map(([category, label]) => (
+              <div key={category} className="timeline-legend-item">
+                <span
+                  className="timeline-legend-dot"
+                  style={{ backgroundColor: categoryColors[category] }}
+                  aria-hidden="true"
+                />
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="timeline-legend-row">
+            {legendEntries.slice(4).map(([category, label]) => (
+              <div key={category} className="timeline-legend-item">
+                <span
+                  className="timeline-legend-dot"
+                  style={{ backgroundColor: categoryColors[category] }}
+                  aria-hidden="true"
+                />
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="timeline-legend-row timeline-legend-row-note">
+            <div className="timeline-legend-item timeline-legend-note">
+              <span className="timeline-legend-gap" aria-hidden="true" />
+              <span>1 slash = about 2 years</span>
             </div>
-          ))}
-          <div className="timeline-legend-item">
-            <span className="timeline-legend-gap" aria-hidden="true" />
-            <span>Long pause in selected milestones</span>
           </div>
         </div>
 
         <div
           className="timeline-surface"
-          style={surfaceStyle}
           onMouseLeave={() => setActiveId(null)}
         >
           <svg
@@ -710,26 +732,27 @@ function HistoryTimeline({ events }) {
             {layout.gapMarkers.map((marker) => (
               <g key={`gap-${marker.label}-${marker.x}`} className="timeline-gap-marker">
                 <line
-                  x1={marker.x - 34}
+                  x1={marker.x - (marker.slashCount * 18 + 24) / 2}
                   y1={marker.lineY}
-                  x2={marker.x + 34}
+                  x2={marker.x + (marker.slashCount * 18 + 24) / 2}
                   y2={marker.lineY}
                   className="timeline-gap-dash"
                 />
-                <line
-                  x1={marker.x - 13}
-                  y1={marker.lineY + 18}
-                  x2={marker.x - 1}
-                  y2={marker.lineY - 18}
-                  className="timeline-gap-slash"
-                />
-                <line
-                  x1={marker.x + 1}
-                  y1={marker.lineY + 18}
-                  x2={marker.x + 13}
-                  y2={marker.lineY - 18}
-                  className="timeline-gap-slash"
-                />
+                {Array.from({ length: marker.slashCount }, (_, index) => {
+                  const slashCenterX =
+                    marker.x - ((marker.slashCount - 1) * 18) / 2 + index * 18
+
+                  return (
+                    <line
+                      key={`${marker.label}-slash-${index}`}
+                      x1={slashCenterX - 6}
+                      y1={marker.lineY + 18}
+                      x2={slashCenterX + 6}
+                      y2={marker.lineY - 18}
+                      className="timeline-gap-slash"
+                    />
+                  )
+                })}
                 <rect
                   x={marker.x - 66}
                   y={marker.labelY - 20}
@@ -749,16 +772,30 @@ function HistoryTimeline({ events }) {
               </g>
             ))}
 
+            <g className="timeline-stem-layer" aria-hidden="true">
+              {layout.orderedEvents.map((event) => {
+                const stemY2 =
+                  event.labelSide === 'below'
+                    ? event.cardY
+                    : event.cardY + 76
+
+                return (
+                  <path
+                    key={`stem-${event.id}`}
+                    d={stemPath(event, stemY2)}
+                    className="timeline-stem"
+                    fill="none"
+                  />
+                )
+              })}
+            </g>
+
             {layout.orderedEvents.map((event) => {
               const isActive = activeEvent?.id === event.id
               const anchorX = getEventAnchorX(event)
               const textX = event.cardCenterX
               const dateY = event.cardY + 22
               const firstLineY = event.cardY + 44
-              const stemY2 =
-                event.labelSide === 'below'
-                  ? event.cardY
-                  : event.cardY + 76
 
               return (
                 <g
@@ -786,11 +823,6 @@ function HistoryTimeline({ events }) {
                     x2={anchorX}
                     y2={event.dotY}
                     className="timeline-dot-pin"
-                  />
-                  <path
-                    d={stemPath(event, stemY2)}
-                    className="timeline-stem"
-                    fill="none"
                   />
                   <circle
                     cx={anchorX}

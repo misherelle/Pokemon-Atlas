@@ -15,7 +15,7 @@ function MarketPage() {
       <PageHero
         eyebrow="Market"
         title="Market"
-        body="How big it got, how fast it moved, and where attention landed."
+        body="Production, prices, and the people buying Pokémon cards."
         highlights={[
           { label: 'Cards', value: '75B+', note: 'Produced by Mar. 2025', tone: 'cool' },
           { label: 'Pocket', value: '150M', note: 'Downloads by Oct. 2025', tone: 'soft' },
@@ -25,7 +25,7 @@ function MarketPage() {
 
       <SectionBlock
         eyebrow="Scale"
-        title="Print runs got much bigger"
+        title="Card production grew"
         body="Official production totals over time."
       >
         <LineChart
@@ -39,7 +39,7 @@ function MarketPage() {
 
       <SectionBlock
         eyebrow="Acceleration"
-        title="Most of the growth is recent"
+        title="Growth sped up recently"
         body="Production climbed fastest in the 2020s."
       >
         <LineChart
@@ -53,7 +53,7 @@ function MarketPage() {
 
       <SectionBlock
         eyebrow="Reach"
-        title="Where the audience shows up"
+        title="Where people collect"
         body="Store shelves, app downloads, and global reach."
       >
         <div className="driver-grid">
@@ -68,7 +68,7 @@ function MarketPage() {
 
       <SectionBlock
         eyebrow="Demand"
-        title="Why demand stays high"
+        title="Why people keep buying"
         body="The same few forces keep showing up."
       >
         <div className="driver-grid">
@@ -82,7 +82,7 @@ function MarketPage() {
 
       <SectionBlock
         eyebrow="Ceiling"
-        title="Auction ceiling"
+        title="Highest sales"
         body="Two sales show how high the top end can go."
       >
         <div className="record-sale-grid">

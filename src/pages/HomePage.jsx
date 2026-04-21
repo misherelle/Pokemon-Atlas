@@ -9,12 +9,13 @@ function HomePage() {
           <p className="eyebrow">Cards, collecting, culture</p>
           <h1>Pokémon Card Atlas</h1>
           <p className="hero-body">A visual guide to how Pokémon cards grew from playground favorite into a collector market.</p>
-          <div className="hero-quick-links">
-            <a href="#/history">Timeline</a>
-            <a href="#/market">Market</a>
-            <a href="#/cards">Card files</a>
-          </div>
         </div>
+
+        <img
+          className="landing-hero-art"
+          src="/images/pikachu-gradient.png"
+          alt="Pikachu gradient illustration"
+        />
 
         <div className="hero-metrics hero-metrics-home">
           {homeStats.map((stat) => (
@@ -27,30 +28,43 @@ function HomePage() {
       </section>
 
       <SectionBlock
+        className="path-section"
         eyebrow="Choose a path"
         title="Where do you want to look first?"
         body="Pick the part of the story you’re most curious about."
+        media={
+          <img
+            className="section-intro-art path-section-art"
+            src="/images/pokelocation-gradient.png"
+            alt="Pokémon location gradient illustration"
+          />
+        }
       >
-        <div className="page-guide-grid page-guide-grid-four">
+        <div className="page-guide-grid page-guide-grid-five">
           <a className="guide-card" href="#/history">
             <span>01</span>
             <h3>Timeline</h3>
-            <p>The big moments, spaced by time</p>
+            <p>Major events by year</p>
           </a>
           <a className="guide-card" href="#/market">
             <span>02</span>
             <h3>Market</h3>
-            <p>Print runs, prices, and reach</p>
+            <p>Production and prices</p>
           </a>
           <a className="guide-card" href="#/collection">
             <span>03</span>
             <h3>Collecting</h3>
-            <p>Rarity, grades, and what people chase</p>
+            <p>Rarity and grades</p>
           </a>
           <a className="guide-card" href="#/cards">
             <span>04</span>
             <h3>Card Files</h3>
-            <p>A closer look at specific cards</p>
+            <p>Specific card examples</p>
+          </a>
+          <a className="guide-card" href="#/game">
+            <span>05</span>
+            <h3>Price Guess</h3>
+            <p>Pick the higher-value card</p>
           </a>
         </div>
       </SectionBlock>

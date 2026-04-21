@@ -9,25 +9,25 @@ function HistoryPage() {
       <PageHero
         eyebrow="Timeline"
         title="Timeline"
-        body="A timeline that keeps the real gaps between moments."
+        body="Key Pokémon card milestones from 1996 to 2026."
         highlights={[
           { label: 'Start', value: '1996', note: 'Game Boy era begins', tone: 'cool' },
-          { label: 'Moments', value: '30', note: 'Key points along the path', tone: 'soft' },
-          { label: 'Span', value: '30 years', note: '1996 to 2026', tone: 'warm' },
+          { label: 'Events', value: '30', note: 'Main points on the timeline', tone: 'soft' },
+          { label: 'Years', value: '30 years', note: '1996 to 2026', tone: 'warm' },
         ]}
       />
 
       <SectionBlock
-        eyebrow="Timeline map"
-        title="30 moments, one path"
-        body="Hover around to see what changed and when."
+        eyebrow="Timeline"
+        title="30 key moments"
+        body="Hover to see what changed and when."
       >
         <HistoryTimeline events={timelineEvents} />
       </SectionBlock>
 
       <SectionBlock
         eyebrow="Then and now"
-        title="How the role changed"
+        title="How collecting changed"
         body="From playground trades to grading, resale, and daily collecting apps."
       >
         <div className="three-up-grid">

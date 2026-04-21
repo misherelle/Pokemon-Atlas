@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage.jsx'
 import HistoryPage from './pages/HistoryPage.jsx'
 import MarketPage from './pages/MarketPage.jsx'
 import CollectionPage from './pages/CollectionPage.jsx'
+import PriceGuessPage from './pages/PriceGuessPage.jsx'
 
 const routes = {
   '/': HomePage,
@@ -12,6 +13,7 @@ const routes = {
   '/market': MarketPage,
   '/collection': CollectionPage,
   '/cards': CardsPage,
+  '/game': PriceGuessPage,
 }
 
 const pageTitles = {
@@ -20,6 +22,7 @@ const pageTitles = {
   '/market': 'Pokémon Card Atlas — Market',
   '/collection': 'Pokémon Card Atlas — Collecting',
   '/cards': 'Pokémon Card Atlas — Card Files',
+  '/game': 'Pokémon Card Atlas — Price Guess',
 }
 
 function normalizeRoute(hash) {

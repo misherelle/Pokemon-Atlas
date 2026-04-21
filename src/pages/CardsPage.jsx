@@ -8,18 +8,23 @@ import {
 function CardsPage() {
   return (
     <div className="page-stack">
-      <section className="page-hero compact-hero">
+      <section className="page-hero compact-hero card-files-hero">
         <div className="page-hero-copy">
-          <p className="eyebrow">Case files</p>
+          <p className="eyebrow">Cards</p>
           <h1>Card Files</h1>
-          <p className="hero-body">A closer look at the cards collectors keep coming back to.</p>
+          <p className="hero-body">Specific cards and why collectors care about them.</p>
         </div>
+        <img
+          className="card-files-hero-art"
+          src="/images/masterball-gradient.png"
+          alt="Master Ball gradient illustration"
+        />
       </section>
 
       <SectionBlock
-        eyebrow="Top 10 in 2026"
-        title="Vintage still dominates"
-        body="A quick read on the cards still setting the high end of the market."
+        eyebrow="High-value cards"
+        title="Cards with big sale prices"
+        body="Recent examples from the high end of the market."
       >
         <div className="top-ten-grid">
           {topValueCards2026.map((card) => (
@@ -47,9 +52,9 @@ function CardsPage() {
       </SectionBlock>
 
       <SectionBlock
-        eyebrow="Case studies"
-        title="A closer look"
-        body="Card image, key facts, and market context in one place."
+        eyebrow="Card examples"
+        title="Card details"
+        body="Images, facts, and sale context in one place."
       >
         <div className="case-study-template-grid">
           {cardCaseStudies.map((card) => (

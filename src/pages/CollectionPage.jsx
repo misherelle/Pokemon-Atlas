@@ -16,18 +16,18 @@ function CollectionPage() {
       <PageHero
         eyebrow="Collecting"
         title="Collecting"
-        body="How rarity, condition, and attention shape value."
+        body="How rarity and condition affect value."
         highlights={[
-          { label: 'Baseline', value: 'Common', note: 'The cards most players see first', tone: 'cool' },
-          { label: 'Chase', value: 'Illustration Rare', note: 'Art-driven demand', tone: 'soft' },
-          { label: 'Premium', value: 'PSA 10', note: 'Condition transforms price', tone: 'warm' },
+          { label: 'Basic tier', value: 'Common', note: 'Cards most players see first', tone: 'cool' },
+          { label: 'Rare art', value: 'Illustration Rare', note: 'Artwork people look for', tone: 'soft' },
+          { label: 'Top grade', value: 'PSA 10', note: 'Condition changes price', tone: 'warm' },
         ]}
       />
 
       <SectionBlock
         eyebrow="Rarity"
         title="Rarity"
-        body="The small visual cues that tell collectors what they’re looking at."
+        body="How the game marks harder-to-find cards."
       >
         <div className="rarity-stack">
           {rarityCards.map((card) => (
@@ -50,8 +50,8 @@ function CollectionPage() {
 
       <SectionBlock
         eyebrow="Grading"
-        title="Grading"
-        body="A card’s condition can change the whole price conversation."
+        title="Why condition matters"
+        body="Cleaner cards usually sell for more."
       >
         <div className="grade-grid">
           {gradingScale.map((grade) => (
@@ -68,8 +68,8 @@ function CollectionPage() {
 
       <SectionBlock
         eyebrow="Compare"
-        title="Comparison"
-        body="The same card can mean very different things depending on context."
+        title="Same card, different value"
+        body="Rarity and condition can change how people price a card."
       >
         <div className="comparison-grid">
           {comparisonPoints.map((item) => (
@@ -82,9 +82,9 @@ function CollectionPage() {
       </SectionBlock>
 
       <SectionBlock
-        eyebrow="Lens switch"
-        title="Three lenses"
-        body="Collector, player, and market views all notice different details."
+        eyebrow="Views"
+        title="Different ways to collect"
+        body="Collectors, players, and buyers look for different things."
       >
         <div className="toggle-row" role="tablist" aria-label="Collector mode">
           <button
@@ -113,13 +113,13 @@ function CollectionPage() {
         <div className="deck-card">
           <div className="lens-card-head">
             <div className="lens-card-title-block">
-              <span className="lens-card-kicker">Current lens</span>
+              <span className="lens-card-kicker">View</span>
               <h3>{deckIdeas[deckMode].title}</h3>
               <p className="lens-card-note">{deckIdeas[deckMode].note}</p>
             </div>
 
             <div className="lens-card-summary-panel">
-              <span>What matters most</span>
+              <span>Main focus</span>
               <p className="lens-card-summary">{deckIdeas[deckMode].summary}</p>
             </div>
           </div>

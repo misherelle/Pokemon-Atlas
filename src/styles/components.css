@@ -8,6 +8,7 @@
 .record-pill,
 .timeline-active-card,
 .top-ten-card,
+.price-game-panel,
 .case-study-template,
 .visual-slot {
   border: 1px solid var(--border);
@@ -43,6 +44,10 @@
 
 .page-guide-grid-four {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.page-guide-grid-five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .driver-grid {
@@ -144,14 +149,27 @@
 
 .timeline-poster-head span {
   color: var(--text-soft);
-  font-size: 0.95rem;
+  font-size: 0.84rem;
+  opacity: 0.76;
 }
 
 .timeline-legend {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  padding: 0 4px 18px;
+  text-align: center;
+}
+
+.timeline-legend-row {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px 16px;
-  padding: 0 4px 18px;
+}
+
+.timeline-legend-row-note {
+  padding-top: 2px;
 }
 
 .timeline-legend-item {
@@ -160,6 +178,11 @@
   gap: 8px;
   color: var(--text-soft);
   font-size: 0.9rem;
+}
+
+.timeline-legend-note {
+  font-size: 0.78rem;
+  opacity: 0.72;
 }
 
 .timeline-legend-dot {
@@ -171,12 +194,11 @@
 
 .timeline-legend-gap {
   position: relative;
-  width: 28px;
+  width: 18px;
   height: 14px;
 }
 
-.timeline-legend-gap::before,
-.timeline-legend-gap::after {
+.timeline-legend-gap::before {
   content: '';
   position: absolute;
   top: 1px;
@@ -187,11 +209,7 @@
 }
 
 .timeline-legend-gap::before {
-  left: 9px;
-}
-
-.timeline-legend-gap::after {
-  left: 17px;
+  left: 8px;
 }
 
 .timeline-surface {
@@ -199,11 +217,7 @@
   overflow: hidden;
   border: 1px solid rgba(127, 109, 242, 0.12);
   border-radius: 28px;
-  background:
-    radial-gradient(circle at var(--timeline-glow-x, 55%) var(--timeline-glow-y, 45%), rgba(127, 109, 242, 0.16), transparent 16%),
-    radial-gradient(circle at calc(var(--timeline-glow-x, 55%) + 8%) calc(var(--timeline-glow-y, 45%) - 3%), rgba(95, 207, 240, 0.11), transparent 20%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 244, 255, 0.92));
-  transition: background 220ms ease;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 247, 255, 0.94));
 }
 
 .timeline-svg {
@@ -277,10 +291,11 @@
 
 .timeline-stem {
   stroke: rgba(127, 109, 242, 0.18);
-  stroke-width: 1.6;
+  stroke-width: 1.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.56;
+  opacity: 0.48;
+  pointer-events: none;
 }
 
 .timeline-dot-pin {
@@ -315,7 +330,7 @@
 }
 
 .timeline-card-box {
-  fill: rgba(255, 255, 255, 0.94);
+  fill: #fff;
   stroke: rgba(88, 75, 143, 0.14);
   stroke-width: 1.5;
   transition:
@@ -325,7 +340,7 @@
 }
 
 .timeline-card-box.active {
-  fill: rgba(249, 246, 255, 0.98);
+  fill: #fbf9ff;
   stroke: rgba(127, 109, 242, 0.38);
   filter: drop-shadow(0 12px 22px rgba(104, 88, 177, 0.14));
 }
@@ -740,6 +755,188 @@
   border-radius: 26px;
 }
 
+.price-game-panel {
+  padding: 24px;
+  border-radius: 30px;
+}
+
+.price-game-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.price-game-head h2 {
+  max-width: 16ch;
+}
+
+.price-game-score {
+  display: grid;
+  gap: 4px;
+  min-width: 150px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--panel-soft);
+}
+
+.price-game-score span {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.price-game-score strong {
+  color: var(--heading);
+  font-family: var(--display);
+  font-size: 1.35rem;
+}
+
+.price-game-note {
+  margin-bottom: 16px;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.price-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.price-card {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 290px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 244, 255, 0.94));
+  color: inherit;
+  text-align: left;
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.price-card:hover:not(:disabled),
+.price-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(127, 109, 242, 0.34);
+  box-shadow: 0 18px 28px rgba(80, 66, 138, 0.1);
+  outline: none;
+}
+
+.price-card:disabled {
+  cursor: default;
+}
+
+.price-card.is-winner {
+  border-color: rgba(55, 204, 177, 0.52);
+  background: linear-gradient(135deg, rgba(239, 255, 251, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.price-card.is-loser {
+  opacity: 0.72;
+}
+
+.price-card-image-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 244px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.price-card-image {
+  max-height: 230px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 20px rgba(48, 40, 84, 0.16));
+}
+
+.price-card-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.price-card-set {
+  color: var(--accent);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.price-card-copy strong {
+  color: var(--heading);
+  font-family: var(--display);
+  font-size: clamp(1.35rem, 3vw, 2.1rem);
+  line-height: 1.08;
+}
+
+.price-card-price {
+  width: fit-content;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: white;
+  color: var(--heading);
+  font-weight: 700;
+}
+
+.price-card.is-loading {
+  display: grid;
+  place-items: center;
+  color: var(--text-soft);
+}
+
+.price-game-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.price-game-actions span {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.price-game-next {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+
+.price-game-next:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.price-game-result {
+  margin-top: 14px;
+  color: var(--heading);
+  font-family: var(--display);
+  font-size: 1.15rem;
+}
+
+.price-game-result.is-correct {
+  color: #16856f;
+}
+
+.price-game-result.is-wrong {
+  color: #b23a6a;
+}
+
 .top-ten-rank {
   display: grid;
   place-items: center;
@@ -915,6 +1112,7 @@
 
 @media (max-width: 1100px) {
   .page-guide-grid-four,
+  .page-guide-grid-five,
   .three-up-grid,
   .driver-grid,
   .record-sale-grid,
@@ -931,7 +1129,9 @@
 }
 
 @media (max-width: 900px) {
-  .top-ten-card {
+  .top-ten-card,
+  .price-card-grid,
+  .price-card {
     grid-template-columns: 1fr;
   }
 }
@@ -950,8 +1150,19 @@
   .three-up-grid,
   .driver-grid,
   .comparison-grid,
-  .record-sale-grid {
+  .record-sale-grid,
+  .price-card-grid {
     grid-template-columns: 1fr;
+  }
+
+  .price-game-head,
+  .price-game-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .price-card {
+    min-height: auto;
   }
 
   .timeline-poster {

@@ -6,6 +6,7 @@ const navigation = [
   { href: '#/market', label: 'Market' },
   { href: '#/collection', label: 'Collecting' },
   { href: '#/cards', label: 'Card Files' },
+  { href: '#/game', label: 'Price Guess' },
 ]
 
 const leftSideNavigation = [
@@ -17,6 +18,7 @@ const leftSideNavigation = [
 const rightSideNavigation = [
   { href: '#/collection', label: 'Collecting', pixel: 'COLL' },
   { href: '#/cards', label: 'Card Files', pixel: 'FILE' },
+  { href: '#/game', label: 'Price Guess', pixel: 'PLAY' },
 ]
 
 function SiteLayout({ children, route }) {
