@@ -447,21 +447,26 @@ function PriceGuessPage() {
           >
             {selectedId ? 'Next pair' : cards.length === 2 ? 'Skip pair' : 'Retry'}
           </button>
-          <span>
-            Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
-            other. New pools are ready on the clock every 10 minutes (:00, :10,
-            :20...)
-            {poolMeta?.nextRefreshAt ? (
-              refreshCountdown && !isPoolExpired ? (
-                <>
-                  {' '}
-                  <strong className="price-refresh-countdown">({refreshCountdown} left)</strong>
-                </>
-              ) : (
-                <strong className="price-refresh-countdown"> (ready now)</strong>
-              )
-            ) : null}
-            . Cards above {formatPrice(minPrice)}. Source: PokéWallet API.
+          <span className="price-game-meta">
+            <span className="price-game-meta-line">
+              Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
+              other. New pools are ready on the clock every 10 minutes (:00, :10,
+              :20...)
+              {poolMeta?.nextRefreshAt ? (
+                refreshCountdown && !isPoolExpired ? (
+                  <>
+                    {' '}
+                    <strong className="price-refresh-countdown">({refreshCountdown} left)</strong>
+                  </>
+                ) : (
+                  <strong className="price-refresh-countdown"> (ready now)</strong>
+                )
+              ) : null}
+              .
+            </span>
+            <span className="price-game-meta-line">
+              Cards above {formatPrice(minPrice)}. Source: PokéWallet API.
+            </span>
           </span>
         </div>
 
