@@ -435,7 +435,7 @@ function buildLayout(events) {
   const minLabelGap = 58
   const labelLaneGap = 146
   const minDotDistance = 82
-  const topPad = 236
+  const topPad = 132
   const rowPitch = 520
   const bottomPad = 152
   const yearLabelOffsetX = 38

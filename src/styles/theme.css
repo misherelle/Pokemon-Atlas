@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Silom Web';
+  src: url('/fonts/SilomBol.ttf') format('truetype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Silom Web';
+  src: url('/fonts/SilomBol.ttf') format('truetype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 700;
+}
+
 :root {
   --bg: linear-gradient(90deg, #acc0f9 0%, #fdf1ed 100%);
   --page: #fffaf4;
@@ -19,7 +35,7 @@
   --sans:
     'Trebuchet MS', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
   --display:
-    'Silom', 'Chalkboard SE', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+    'Silom Web', 'Silom', 'Chalkboard SE', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
 
   font-family: var(--sans);
   line-height: 1.45;
@@ -98,7 +114,7 @@ h3 {
   margin: 0;
   color: var(--heading);
   font-family: var(--display);
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 h1,

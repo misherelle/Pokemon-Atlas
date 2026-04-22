@@ -22,11 +22,11 @@ This project is now structured as a lightweight multi-page React site with separ
 - `#/cards` card examples and sale context
 - `#/game` Price Guess card value game
 
-### PokeWallet API
+### PokéWallet API
 
-`#/game` uses `/api/pokewallet/pool`, `/api/pokewallet/status`, and `/api/pokewallet/images/:id`, which are Vercel-ready serverless functions. The PokeWallet key stays on the server and is never exposed to React.
+`#/game` uses `/api/pokewallet/pool`, `/api/pokewallet/status`, and `/api/pokewallet/images?id=...`, which are Vercel-ready serverless functions. The PokéWallet key stays on the server and is never exposed to React.
 
-For local setup, copy `.env.example` to `.env.local`, add your PokeWallet key, then restart `npm run dev`.
+For local setup, copy `.env.example` to `.env.local`, add your PokéWallet key, then restart `npm run dev`.
 
 ```bash
 POKEWALLET_API_KEY=your_key
@@ -37,6 +37,8 @@ POKEWALLET_MAX_HOURLY_REQUESTS=90
 POKEWALLET_SEARCHES_PER_REFRESH=8
 POKEWALLET_MAX_CARDS_PER_QUERY=3
 POKEWALLET_IMAGE_CACHE_MINUTES=60
+POKEWALLET_ENGLISH_ONLY=true
+POKEWALLET_SEARCH_QUERIES=all-pokemon
 ```
 
 For Vercel:
@@ -44,12 +46,12 @@ For Vercel:
 1. Push this repo to GitHub.
 2. In Vercel, choose Add New -> Project and import the GitHub repo.
 3. Keep the defaults: Framework Preset `Vite`, Build Command `npm run build`, Output Directory `dist`.
-4. Add the PokeWallet values in Project Settings -> Environment Variables.
+4. Add the PokéWallet values in Project Settings -> Environment Variables.
 5. Deploy. If you edit an env var later, redeploy so the new value is used.
 
-The game builds a 15-card pool from PokeWallet at most once every 10 minutes. It samples several search terms and limits how many cards can come from one term, so the pool is less likely to be all one Pokémon. It filters out sealed products like packs, boxes, tins, displays, and collections. The browser then compares cards from that cached pool, so normal play does not call the price API on every guess.
+The game builds a 15-card pool from PokéWallet at most once every 10 minutes. By default, `POKEWALLET_SEARCH_QUERIES=all-pokemon` samples from a built-in list of 1,025 Pokémon names, with a few high-value search terms mixed in so the $20 filter still finds cards. It filters out sealed products like packs, boxes, tins, displays, collections, and non-English set patterns. The browser then compares cards from that cached pool, so normal play does not call the price API on every guess.
 
-The API code follows PokeWallet's documented key flow:
+The API code follows PokéWallet's documented key flow:
 
 - `GET https://api.pokewallet.io/search` for card and price data
 - `GET https://api.pokewallet.io/images/:id` through a server proxy for card images

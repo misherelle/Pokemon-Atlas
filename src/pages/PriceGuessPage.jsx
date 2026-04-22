@@ -6,6 +6,8 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
+const CARD_IMAGE_FALLBACK = '/images/card-fallback.svg'
+
 function formatPrice(price) {
   if (price >= 1000000) {
     return `$${(price / 1000000).toFixed(price >= 10000000 ? 2 : 1)}M`
@@ -31,6 +33,18 @@ function pickCardPair(pool) {
   )
 
   return alternate && pair[0] ? [pair[0], alternate] : pair
+}
+
+function handleCardImageError(event) {
+  const image = event.currentTarget
+
+  if (image.dataset.fallbackApplied === 'true') {
+    return
+  }
+
+  image.dataset.fallbackApplied = 'true'
+  image.alt = 'Card image unavailable'
+  image.src = CARD_IMAGE_FALLBACK
 }
 
 function PriceGuessPage() {
@@ -67,11 +81,11 @@ function PriceGuessPage() {
 
       if (!response.ok) {
         setMinPrice(data.minPrice ?? 20)
-        throw new Error(data.error || 'PokeWallet prices are unavailable.')
+        throw new Error(data.error || 'PokéWallet prices are unavailable.')
       }
 
       if (!Array.isArray(data.cards) || data.cards.length < 2) {
-        throw new Error('PokeWallet did not find two cards for this round. Try again.')
+        throw new Error('PokéWallet did not find two cards for this round. Try again.')
       }
 
       setCardPool(data.cards)
@@ -84,7 +98,7 @@ function PriceGuessPage() {
       setCardPool([])
       setPoolMeta(null)
       setNotice('')
-      setApiError(error.message || 'PokeWallet prices are unavailable.')
+      setApiError(error.message || 'PokéWallet prices are unavailable.')
     } finally {
       setIsLoading(false)
     }
@@ -159,7 +173,7 @@ function PriceGuessPage() {
           <div className="price-game-error" role="status">
             <strong>
               {apiError.includes('not configured')
-                ? 'Live PokeWallet prices are not connected yet.'
+                ? 'Live PokéWallet prices are not connected yet.'
                 : 'Could not load a card pair.'}
             </strong>
             <p>{apiError}</p>
@@ -203,7 +217,12 @@ function PriceGuessPage() {
                   onClick={() => handleGuess(card)}
                 >
                   <span className="price-card-image-wrap">
-                    <img src={card.imageUrl} alt={card.name} className="price-card-image" />
+                    <img
+                      src={card.imageUrl || CARD_IMAGE_FALLBACK}
+                      alt={card.name}
+                      className="price-card-image"
+                      onError={handleCardImageError}
+                    />
                   </span>
                   <span className="price-card-copy">
                     <span className="price-card-set">{card.setName}</span>
@@ -230,8 +249,8 @@ function PriceGuessPage() {
           </button>
           <span>
             Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
-            other. Refreshes every {poolMeta?.cacheMinutes ?? 10} min. Above{' '}
-            {formatPrice(minPrice)}. Source: PokeWallet API.
+            other. Refreshes every {poolMeta?.cacheMinutes ?? 10} min. Cards above{' '}
+            {formatPrice(minPrice)}. Source: PokéWallet API.
           </span>
         </div>
 

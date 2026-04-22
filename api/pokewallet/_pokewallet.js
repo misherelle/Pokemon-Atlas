@@ -1,4 +1,5 @@
 import { env as processEnv } from 'node:process'
+import { pokemonSearchTerms } from './pokemonSearchTerms.js'
 
 const POKEWALLET_API_BASE = 'https://api.pokewallet.io'
 const DEFAULT_CACHE_MINUTES = 10
@@ -9,8 +10,9 @@ const DEFAULT_POOL_SIZE = 15
 const DEFAULT_SEARCHES_PER_REFRESH = 8
 const DEFAULT_MAX_CARDS_PER_QUERY = 3
 const DEFAULT_IMAGE_CACHE_MINUTES = 60
+const DEFAULT_ENGLISH_ONLY = true
 
-const searchQueries = [
+const prioritySearchQueries = [
   'charizard ex',
   'pikachu ex',
   'umbreon',
@@ -31,6 +33,17 @@ const searchQueries = [
   'arceus',
   'lucario',
   'magikarp',
+]
+
+const prioritySearchQuerySet = new Set(
+  prioritySearchQueries.map((query) => query.toLowerCase()),
+)
+
+const builtinSearchQueries = [
+  ...prioritySearchQueries,
+  ...pokemonSearchTerms.filter(
+    (query) => !prioritySearchQuerySet.has(query.toLowerCase()),
+  ),
 ]
 
 const sealedProductPatterns = [
@@ -60,6 +73,13 @@ const sealedProductPatterns = [
   /\bcode card\b/i,
 ]
 
+const nonEnglishSetPatterns = [
+  /\b(?:japanese|japan|korean|chinese|thai|indonesian|german|french|italian|spanish|portuguese)\b/i,
+  /^(?:S-P|XY-P|SM\d+[a-z]|SV\d+[a-z]|M\d+|CP\d+|BW\d+[a-z]|XY\d+[a-z]|DP\d+[a-z])\s*[:_]/i,
+  /\b(?:pokemon card 151|expansion pack|night unison|ninja spinner|shiny treasure|vstar universe|terastal festival|eevee heroes|tag bolt|dream league|lost abyss|clay burst|snow hazard|raging surf|ancient roar|future flash|wild force|cyber judge|battle partners)\b/i,
+  /\b(?:S-P|XY-P|SM-P|SV-P)\b/i,
+]
+
 let poolCache = null
 const imageCache = new Map()
 let requestWindow = {
@@ -79,6 +99,14 @@ function numberFromEnv(value, fallback) {
   const numberValue = Number(value)
 
   return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : fallback
+}
+
+function booleanFromEnv(value, fallback) {
+  if (value == null || value === '') {
+    return fallback
+  }
+
+  return ['1', 'true', 'yes', 'on'].includes(String(value).trim().toLowerCase())
 }
 
 function cleanApiKey(value) {
@@ -139,6 +167,27 @@ function isSingleCard(card) {
   return !sealedProductPatterns.some((pattern) => pattern.test(searchableText))
 }
 
+function isEnglishCard(card) {
+  const info = card.card_info ?? {}
+  const language = info.language ?? card.language ?? card.set?.language
+
+  if (language) {
+    return /^(en|eng|english)$/i.test(String(language))
+  }
+
+  const searchableText = [
+    info.name,
+    info.clean_name,
+    info.set_name,
+    info.set_code,
+    card.cardmarket?.product_name,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return !nonEnglishSetPatterns.some((pattern) => pattern.test(searchableText))
+}
+
 function getBestPrice(priceEntries = []) {
   return priceEntries
     .map((entry) => ({
@@ -158,8 +207,32 @@ function hashText(value) {
 
 function getSearchQueries(config, now = Date.now()) {
   const bucket = Math.floor(now / config.cacheMs)
-  const configuredQueries = config.searchQueries.length ? config.searchQueries : searchQueries
-  const seededQueries = configuredQueries
+
+  if (config.usesBuiltInPokemonSearch) {
+    const priorityCount = Math.min(2, config.searchesPerRefresh)
+    const priorityQueries = prioritySearchQueries
+      .map((query) => ({
+        query,
+        sortKey: hashText(`${bucket}:priority:${query}`),
+      }))
+      .sort((first, second) => first.sortKey - second.sortKey)
+      .slice(0, priorityCount)
+      .map((entry) => entry.query)
+    const prioritySet = new Set(priorityQueries)
+    const pokemonQueries = builtinSearchQueries
+      .filter((query) => !prioritySet.has(query))
+      .map((query) => ({
+        query,
+        sortKey: hashText(`${bucket}:pokemon:${query}`),
+      }))
+      .sort((first, second) => first.sortKey - second.sortKey)
+      .slice(0, config.searchesPerRefresh - priorityQueries.length)
+      .map((entry) => entry.query)
+
+    return [...priorityQueries, ...pokemonQueries]
+  }
+
+  const seededQueries = config.searchQueries
     .map((query) => ({
       query,
       sortKey: hashText(`${bucket}:${query}`),
@@ -170,24 +243,18 @@ function getSearchQueries(config, now = Date.now()) {
   return seededQueries.slice(0, config.searchesPerRefresh)
 }
 
-function normalizeCard(card) {
+function normalizeCard(card, config) {
   const info = card.card_info ?? {}
 
-  const tcgplayerBestPrice = getBestPrice(card.tcgplayer?.prices)
-  const cardmarketPrice =
-    typeof card.cardmarket?.price === 'number' && card.cardmarket.price > 0
-      ? {
-          entry: {
-            sub_type_name: 'Cardmarket',
-            updated_at: card.cardmarket.updated_at,
-          },
-          price: card.cardmarket.price,
-        }
-      : null
+  const bestPrice = getBestPrice(card.tcgplayer?.prices)
 
-  const bestPrice = tcgplayerBestPrice || cardmarketPrice
-
-  if (!bestPrice?.price || !card.id || !info.name || !isSingleCard(card)) {
+  if (
+    !bestPrice?.price ||
+    !card.id ||
+    !info.name ||
+    !isSingleCard(card) ||
+    (config.englishOnly && !isEnglishCard(card))
+  ) {
     return null
   }
 
@@ -274,7 +341,11 @@ export function getPokeWalletConfig(env = processEnv) {
     .split(',')
     .map((query) => query.trim())
     .filter(Boolean)
-  const queryCount = configuredQueries.length || searchQueries.length
+  const usesBuiltInPokemonSearch =
+    !configuredQueries.length ||
+    configuredQueries.some((query) => query.toLowerCase() === 'all-pokemon')
+  const searchQueries = usesBuiltInPokemonSearch ? builtinSearchQueries : configuredQueries
+  const queryCount = searchQueries.length
   const apiKey = cleanApiKey(env.POKEWALLET_API_KEY)
 
   const config = {
@@ -299,9 +370,11 @@ export function getPokeWalletConfig(env = processEnv) {
       env.POKEWALLET_MAX_CARDS_PER_QUERY,
       DEFAULT_MAX_CARDS_PER_QUERY,
     ),
+    englishOnly: booleanFromEnv(env.POKEWALLET_ENGLISH_ONLY, DEFAULT_ENGLISH_ONLY),
     minPrice: numberFromEnv(env.POKEWALLET_MIN_PRICE, DEFAULT_MIN_PRICE),
     poolSize: numberFromEnv(env.POKEWALLET_POOL_SIZE, DEFAULT_POOL_SIZE),
-    searchQueries: configuredQueries,
+    searchQueries,
+    usesBuiltInPokemonSearch,
   }
 
   config.maxHourlyRequests = Math.min(config.maxHourlyRequests, HOURLY_REQUEST_CEILING)
@@ -361,14 +434,6 @@ async function fetchPool(config) {
   const seen = new Set()
   const cards = []
 
-  console.log('pokewallet queries:', queries)
-  console.log('pokewallet config:', {
-    minPrice: config.minPrice,
-    poolSize: config.poolSize,
-    maxCardsPerQuery: config.maxCardsPerQuery,
-    searchesPerRefresh: config.searchesPerRefresh,
-  })
-
   for (const query of queries) {
     const params = new URLSearchParams({
       q: query,
@@ -376,19 +441,10 @@ async function fetchPool(config) {
       limit: '100',
     })
 
-    console.log('pokewallet requesting query:', query)
-
     const response = await pokewalletRequest(config, `/search?${params}`)
     const data = await response.json()
 
-    console.log('pokewallet raw results count:', query, data.results?.length ?? 0)
-
-    const normalizedCards = (data.results ?? []).map(normalizeCard)
-    console.log(
-      'pokewallet normalized count:',
-      query,
-      normalizedCards.filter(Boolean).length,
-    )
+    const normalizedCards = (data.results ?? []).map((card) => normalizeCard(card, config))
 
     const filteredCards = shuffle(normalizedCards).filter((card) => {
       if (!card || card.price < config.minPrice || seen.has(card.productId)) {
@@ -402,8 +458,6 @@ async function fetchPool(config) {
     console.log('pokewallet filtered count:', query, filteredCards.length)
 
     cards.push(...filteredCards.slice(0, config.maxCardsPerQuery))
-
-    console.log('pokewallet total cards so far:', cards.length)
 
     if (cards.length >= config.poolSize) {
       break
@@ -445,7 +499,11 @@ export async function getCardPool(env = processEnv) {
     minPrice: config.minPrice,
     searchQueries: queries,
     maxCardsPerQuery: config.maxCardsPerQuery,
-    filters: ['single cards only', 'sealed products removed'],
+    filters: [
+      'single cards only',
+      'sealed products removed',
+      ...(config.englishOnly ? ['English TCGplayer cards only'] : []),
+    ],
     refreshedAt,
     nextRefreshAt: new Date(expiresAt).toISOString(),
   }
@@ -487,6 +545,10 @@ export async function getCardImage(cardId, size = 'low', env = processEnv) {
     buffer: await response.arrayBuffer(),
   }
 
+  if (!image.contentType.toLowerCase().startsWith('image/')) {
+    throw new Error('PokéWallet returned a non-image response for this card.')
+  }
+
   imageCache.set(cacheKey, {
     expiresAt: now + config.imageCacheMinutes * 60 * 1000,
     image,
@@ -508,8 +570,10 @@ export function getStatus(env = processEnv) {
     maxHourlyRequests: config.maxHourlyRequests,
     searchesPerRefresh: config.searchesPerRefresh,
     maxCardsPerQuery: config.maxCardsPerQuery,
+    englishOnly: config.englishOnly,
     minPrice: config.minPrice,
     poolSize: config.poolSize,
+    searchQueryCount: config.searchQueries.length,
     cachedCards: poolCache?.expiresAt > now ? poolCache.payload.cards.length : 0,
     nextRefreshAt: poolCache?.expiresAt > now ? poolCache.payload.nextRefreshAt : null,
     requestsUsedThisHour: getRateWindow(now).used,

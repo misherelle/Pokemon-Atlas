@@ -498,9 +498,71 @@
   stroke-width: 1;
 }
 
+.chart-line-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 8px 12px rgba(80, 66, 138, 0.1));
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: chart-draw 900ms cubic-bezier(0.2, 0.7, 0.25, 1) forwards;
+}
+
 .chart-label {
   fill: var(--text-soft);
   font-size: 12px;
+}
+
+.chart-point {
+  cursor: pointer;
+  outline: none;
+}
+
+.chart-point-hit {
+  fill: transparent;
+}
+
+.chart-point-dot {
+  stroke: white;
+  stroke-width: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    filter 180ms ease,
+    stroke-width 180ms ease,
+    transform 180ms ease;
+}
+
+.chart-point:hover .chart-point-dot,
+.chart-point:focus-visible .chart-point-dot,
+.chart-point.is-active .chart-point-dot {
+  filter: drop-shadow(0 0 12px rgba(127, 109, 242, 0.36));
+  stroke-width: 3;
+  transform: scale(1.5);
+}
+
+.chart-tooltip {
+  pointer-events: none;
+  animation: chart-tooltip-pop 180ms ease-out both;
+}
+
+.chart-tooltip-bg {
+  fill: rgba(255, 255, 255, 0.96);
+  stroke: rgba(127, 109, 242, 0.2);
+  stroke-width: 1.2;
+  filter: drop-shadow(0 12px 18px rgba(80, 66, 138, 0.14));
+}
+
+.chart-tooltip-year {
+  fill: var(--text-soft);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chart-tooltip-value {
+  fill: var(--heading);
+  font-family: var(--display);
+  font-size: 16px;
 }
 
 .chart-legend {
@@ -1390,5 +1452,23 @@
   50% {
     opacity: 1;
     transform: scale(1.08);
+  }
+}
+
+@keyframes chart-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chart-tooltip-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

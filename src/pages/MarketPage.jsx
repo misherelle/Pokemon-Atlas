@@ -32,7 +32,7 @@ function MarketPage() {
           data={productionTotals}
           ariaLabel="Chart showing cumulative Pokémon card production totals over time"
           lines={[
-            { key: 'total', label: 'Total cards produced, in billions', color: '#7f6df2' },
+            { key: 'total', label: 'Total cards produced, in billions', color: '#7f6df2', unit: 'B' },
           ]}
         />
       </SectionBlock>
@@ -46,7 +46,7 @@ function MarketPage() {
           data={annualProduction}
           ariaLabel="Chart showing annual Pokémon card production added by year"
           lines={[
-            { key: 'added', label: 'Cards added that year, in billions', color: '#63bcd6' },
+            { key: 'added', label: 'Cards added that year, in billions', color: '#63bcd6', unit: 'B' },
           ]}
         />
       </SectionBlock>

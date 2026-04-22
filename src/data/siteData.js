@@ -201,7 +201,7 @@ export const productionTotals = [
 ]
 
 export const annualProduction = [
-  { year: '2020', added: 3.1 },
+  { year: '2020', added: 3.2 },
   { year: '2021', added: 3.7 },
   { year: '2022', added: 9.1 },
   { year: '2023', added: 9.7 },
