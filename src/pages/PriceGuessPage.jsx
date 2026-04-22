@@ -445,10 +445,12 @@ function PriceGuessPage() {
             onClick={cards.length === 2 ? loadNextPair : loadPool}
             disabled={isLoading}
           >
-            {selectedId ? 'Next' : cards.length === 2 ? 'Skip' : 'Retry'}
+            {selectedId ? 'Next pair' : cards.length === 2 ? 'Skip pair' : 'Retry'}
           </button>
           <span>
-            {poolMeta?.poolSize ?? 15} cards. Refreshes every 10 minutes (:00, :10, :20...)
+            Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
+            other. New pools are ready on the clock every 10 minutes (:00, :10,
+            :20...)
             {poolMeta?.nextRefreshAt ? (
               refreshCountdown && !isPoolExpired ? (
                 <>
@@ -467,7 +469,7 @@ function PriceGuessPage() {
           <div className="price-refresh-prompt" role="status">
             <div>
               <strong>New cards are ready.</strong>
-              <p>This pool stays still until you refresh, so the game will not loop on its own.</p>
+              <p>Your current pool stays the same until you refresh, so it will not change while you are playing.</p>
             </div>
             <button type="button" onClick={() => window.location.reload()}>
               Refresh cards
