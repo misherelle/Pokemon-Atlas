@@ -2,6 +2,8 @@
 
 A small React project about Pokémon cards, collecting, and why some cards became so valuable.
 
+Built for COMM-4470: Information Design class.
+
 Live site: [pokemon-atlas.vercel.app](https://pokemon-atlas.vercel.app/)
 
 ## What This Is
