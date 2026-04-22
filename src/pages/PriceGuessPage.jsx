@@ -369,6 +369,12 @@ function PriceGuessPage() {
           <p className="price-game-note">{notice}</p>
         ) : null}
 
+        {isCorrect != null ? (
+          <p className={`price-game-result${isCorrect ? ' is-correct' : ' is-wrong'}`}>
+            {isCorrect ? 'Correct.' : `Not quite. ${higherCard.name} was higher.`}
+          </p>
+        ) : null}
+
         {apiError && cards.length !== 2 ? (
           <div className="price-game-error" role="status">
             <strong>
@@ -480,12 +486,6 @@ function PriceGuessPage() {
               Refresh cards
             </button>
           </div>
-        ) : null}
-
-        {isCorrect != null ? (
-          <p className={`price-game-result${isCorrect ? ' is-correct' : ' is-wrong'}`}>
-            {isCorrect ? 'Correct.' : `Not quite. ${higherCard.name} was higher.`}
-          </p>
         ) : null}
       </section>
     </div>

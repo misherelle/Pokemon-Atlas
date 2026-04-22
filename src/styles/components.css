@@ -830,10 +830,11 @@
 }
 
 .case-study-main .visual-slot.has-image {
-  align-self: start;
+  align-self: stretch;
   width: 100%;
-  min-height: 0;
-  aspect-ratio: 0.66;
+  height: 100%;
+  min-height: clamp(420px, 34vw, 560px);
+  aspect-ratio: auto;
   padding: 10px;
 }
 
@@ -1209,17 +1210,26 @@
 }
 
 .price-game-result {
-  margin-top: 14px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(127, 109, 242, 0.14);
+  border-radius: 18px;
+  background: rgba(248, 244, 255, 0.78);
   color: var(--heading);
   font-family: var(--display);
-  font-size: 1.15rem;
+  font-size: 1.02rem;
+  line-height: 1.2;
 }
 
 .price-game-result.is-correct {
+  border-color: rgba(55, 204, 177, 0.3);
+  background: rgba(239, 255, 251, 0.9);
   color: #16856f;
 }
 
 .price-game-result.is-wrong {
+  border-color: rgba(178, 58, 106, 0.2);
+  background: rgba(255, 79, 143, 0.06);
   color: #b23a6a;
 }
 
@@ -1243,9 +1253,9 @@
 .case-study-template {
   display: grid;
   grid-template-columns:
-    minmax(210px, 0.52fr)
-    minmax(300px, 0.74fr)
-    minmax(360px, 0.68fr);
+    minmax(220px, 0.58fr)
+    minmax(340px, 0.92fr)
+    minmax(320px, 0.56fr);
   gap: 18px;
   align-items: stretch;
   padding: 20px;
@@ -1258,8 +1268,10 @@
 
 .case-study-info {
   display: grid;
-  align-content: start;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  align-content: stretch;
   gap: 14px;
+  height: 100%;
   min-width: 0;
 }
 
@@ -1276,6 +1288,10 @@
 }
 
 .case-fact-row {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
   padding: 9px 0;
   border: 0;
   border-bottom: 1px solid rgba(127, 109, 242, 0.08);
@@ -1284,6 +1300,15 @@
   color: var(--text-soft);
   font-size: 0.92rem;
   line-height: 1.25;
+}
+
+.case-fact-row::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(127, 109, 242, 0.08);
 }
 
 .case-fact-row:last-child {
@@ -1307,6 +1332,7 @@
 
 .case-study-info .market-snapshot {
   display: grid;
+  align-content: start;
   gap: 8px;
   padding: 13px 14px;
   border-color: transparent;
@@ -1745,6 +1771,14 @@
   .price-card-price {
     padding: 8px 10px;
     font-size: 0.88rem;
+  }
+
+  .price-game-result {
+    margin-bottom: 12px;
+    padding: 9px 11px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    line-height: 1.25;
   }
 
   .price-game-meta {
