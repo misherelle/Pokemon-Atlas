@@ -6,7 +6,6 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 })
 
-const CARD_IMAGE_FALLBACK = '/images/card-fallback.svg'
 const PRICE_GUESS_STATS_KEY = 'pokemon-atlas-price-guess-stats'
 
 const defaultStats = {
@@ -139,18 +138,6 @@ function buildPairQueue(pool, lastPairKey = '') {
   return queue
 }
 
-function handleCardImageError(event) {
-  const image = event.currentTarget
-
-  if (image.dataset.fallbackApplied === 'true') {
-    return
-  }
-
-  image.dataset.fallbackApplied = 'true'
-  image.alt = 'Card image unavailable'
-  image.src = CARD_IMAGE_FALLBACK
-}
-
 function PriceGuessPage() {
   const [cards, setCards] = useState([])
   const [cardPool, setCardPool] = useState([])
@@ -165,6 +152,7 @@ function PriceGuessPage() {
   const [now, setNow] = useState(() => Date.now())
   const [stats, setStats] = useState(loadSavedStats)
   const [isRefreshPromptOpen, setIsRefreshPromptOpen] = useState(false)
+  const [unavailableImageIds, setUnavailableImageIds] = useState(() => new Set())
   const { score, rounds, streak, bestStreak, bestScore, bestScoreRounds } = stats
 
   const higherCard = useMemo(() => {
@@ -404,6 +392,8 @@ function PriceGuessPage() {
               const isSelected = selectedId === card.productId
               const isWinner = higherCard?.productId === card.productId
               const isRevealed = selectedId != null
+              const isImageUnavailable =
+                !card.imageUrl || unavailableImageIds.has(card.productId)
               const cardClass = [
                 'price-card',
                 isSelected ? 'is-selected' : '',
@@ -423,12 +413,24 @@ function PriceGuessPage() {
                   onClick={() => handleGuess(card)}
                 >
                   <span className="price-card-image-wrap">
-                    <img
-                      src={card.imageUrl || CARD_IMAGE_FALLBACK}
-                      alt={card.name}
-                      className="price-card-image"
-                      onError={handleCardImageError}
-                    />
+                    {isImageUnavailable ? (
+                      <span className="price-card-image-unavailable">
+                        Image is not available.
+                      </span>
+                    ) : (
+                      <img
+                        src={card.imageUrl}
+                        alt={card.name}
+                        className="price-card-image"
+                        onError={() => {
+                          setUnavailableImageIds((currentIds) => {
+                            const nextIds = new Set(currentIds)
+                            nextIds.add(card.productId)
+                            return nextIds
+                          })
+                        }}
+                      />
+                    )}
                   </span>
                   <span className="price-card-copy">
                     <span className="price-card-set">{card.setName}</span>

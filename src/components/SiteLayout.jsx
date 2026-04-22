@@ -25,8 +25,9 @@ function MobileNavIcon({ name }) {
   if (name === 'home') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 11.5 12 5l8 6.5" />
-        <path d="M7 10.5V20h10v-9.5" />
+        <path d="M4.5 11.5 12 5l7.5 6.5" />
+        <path d="M6.8 10.6v8.7h10.4v-8.7" />
+        <path d="M10.2 19.3v-4.8h3.6v4.8" />
       </svg>
     )
   }
@@ -34,10 +35,10 @@ function MobileNavIcon({ name }) {
   if (name === 'timeline') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 12h16" />
-        <circle cx="7" cy="12" r="2.2" />
-        <circle cx="13" cy="12" r="2.2" />
-        <circle cx="19" cy="12" r="2.2" />
+        <path d="M4 17.5c2.2-5.2 4.5-7.8 7-7.8 2 0 2.9 1.8 4.5 1.8 1.4 0 2.7-1.3 4.5-5" />
+        <circle cx="6.2" cy="14.2" r="1.6" />
+        <circle cx="12" cy="9.8" r="1.6" />
+        <circle cx="18.8" cy="7.2" r="1.6" />
       </svg>
     )
   }
@@ -45,8 +46,11 @@ function MobileNavIcon({ name }) {
   if (name === 'market') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 18 9 12l4 3 7-9" />
-        <path d="M4 20h16" />
+        <path d="M4 19h16" />
+        <path d="M6.5 16v-4" />
+        <path d="M11.5 16V8" />
+        <path d="M16.5 16v-6" />
+        <path d="M5.8 9.8 10 7l3.4 2.5 5-5" />
       </svg>
     )
   }
@@ -54,8 +58,10 @@ function MobileNavIcon({ name }) {
   if (name === 'collection') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="7" />
-        <path d="M12 5v14M5 12h14" />
+        <path d="M6 5.5h10.8c.7 0 1.2.5 1.2 1.2v12.1H7.2A1.2 1.2 0 0 1 6 17.6Z" />
+        <path d="M9 5.5v13.3" />
+        <path d="M12 8.5h3.2" />
+        <path d="M12 11.5h3.2" />
       </svg>
     )
   }
@@ -63,17 +69,20 @@ function MobileNavIcon({ name }) {
   if (name === 'cards') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="5" y="7" width="10" height="13" rx="2" />
-        <path d="M9 4h8a2 2 0 0 1 2 2v11" />
+        <rect x="6.5" y="5" width="9.5" height="13.5" rx="1.8" />
+        <path d="M10 8h2.5" />
+        <path d="M9.2 15.2h4.1" />
+        <path d="M12 3.8h5.5v11.8" />
       </svg>
     )
   }
 
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 12h10" />
-      <path d="M12 7v10" />
-      <circle cx="12" cy="12" r="8" />
+      <path d="M5.5 8.5h13l-1.3 9.2H6.8Z" />
+      <path d="M8 8.5 9.2 5h5.6L16 8.5" />
+      <path d="M10.2 12.8h3.4a1.7 1.7 0 0 1 0 3.4h-3.4" />
+      <path d="M12 11.5v5.8" />
     </svg>
   )
 }

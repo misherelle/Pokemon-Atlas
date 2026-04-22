@@ -580,7 +580,7 @@ function getHorizontalAlign(event, width) {
   return 'center'
 }
 
-const minTimelineZoom = 0.5
+const minTimelineZoom = 0.35
 const maxTimelineZoom = 1.45
 
 function getPointerCenter(points) {
@@ -803,19 +803,35 @@ function HistoryTimeline({ events }) {
           </div>
 
         <div className="timeline-legend" aria-label="Timeline color legend">
-          {legendEntries.map(([category, label]) => (
-            <div key={category} className="timeline-legend-item">
-              <span
-                className="timeline-legend-dot"
-                style={{ backgroundColor: categoryColors[category] }}
-                aria-hidden="true"
-              />
-              <span>{label}</span>
+          <div className="timeline-legend-row">
+            {legendEntries.slice(0, 4).map(([category, label]) => (
+              <div key={category} className="timeline-legend-item">
+                <span
+                  className="timeline-legend-dot"
+                  style={{ backgroundColor: categoryColors[category] }}
+                  aria-hidden="true"
+                />
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="timeline-legend-row">
+            {legendEntries.slice(4).map(([category, label]) => (
+              <div key={category} className="timeline-legend-item">
+                <span
+                  className="timeline-legend-dot"
+                  style={{ backgroundColor: categoryColors[category] }}
+                  aria-hidden="true"
+                />
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="timeline-legend-row timeline-legend-row-note">
+            <div className="timeline-legend-item timeline-legend-note">
+              <span className="timeline-legend-gap" aria-hidden="true" />
+              <span>1 slash = about 2 years</span>
             </div>
-          ))}
-          <div className="timeline-legend-item timeline-legend-note">
-            <span className="timeline-legend-gap" aria-hidden="true" />
-            <span>1 slash = about 2 years</span>
           </div>
         </div>
 

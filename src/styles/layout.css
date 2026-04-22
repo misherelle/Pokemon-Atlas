@@ -653,13 +653,18 @@
   }
 
   .mobile-bottom-nav svg {
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 2;
+    stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .mobile-bottom-nav a.is-active svg {
+    stroke-width: 2.15;
   }
 
   .mobile-bottom-nav span {
