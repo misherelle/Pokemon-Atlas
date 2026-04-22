@@ -198,7 +198,7 @@ function normalizeCard(card) {
     rarity: info.rarity,
     cardNumber: info.card_number,
     cardType: info.card_type,
-    imageUrl: `/api/pokewallet/images/${encodeURIComponent(card.id)}?size=low`,
+    imageUrl: `/api/pokewallet/images?id=${encodeURIComponent(card.id)}&size=low`,
     price: bestPrice.price,
     printing: bestPrice.entry.sub_type_name,
     url: card.tcgplayer?.url || card.cardmarket?.product_url || '',

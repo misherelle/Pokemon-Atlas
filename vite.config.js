@@ -12,10 +12,10 @@ function sendJson(response, status, data) {
 
 function getLocalImageRequest(requestUrl) {
   const url = new URL(requestUrl ?? '', 'http://localhost')
-  const cardId = decodeURIComponent(url.pathname.replace(/^\/+/, ''))
+  const pathCardId = decodeURIComponent(url.pathname.replace(/^\/+/, ''))
 
   return {
-    cardId,
+    cardId: url.searchParams.get('id') || pathCardId,
     size: url.searchParams.get('size') ?? 'low',
   }
 }
