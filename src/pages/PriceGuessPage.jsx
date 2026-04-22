@@ -7,6 +7,56 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 })
 
 const CARD_IMAGE_FALLBACK = '/images/card-fallback.svg'
+const PRICE_GUESS_STATS_KEY = 'pokemon-atlas-price-guess-stats'
+
+const defaultStats = {
+  score: 0,
+  rounds: 0,
+  streak: 0,
+  bestStreak: 0,
+  bestScore: 0,
+  bestScoreRounds: 0,
+}
+
+function cleanNumber(value) {
+  return Number.isFinite(Number(value)) && Number(value) >= 0 ? Number(value) : 0
+}
+
+function normalizeStats(stats) {
+  return {
+    ...defaultStats,
+    score: cleanNumber(stats?.score),
+    rounds: cleanNumber(stats?.rounds),
+    streak: cleanNumber(stats?.streak),
+    bestStreak: cleanNumber(stats?.bestStreak),
+    bestScore: cleanNumber(stats?.bestScore),
+    bestScoreRounds: cleanNumber(stats?.bestScoreRounds),
+  }
+}
+
+function loadSavedStats() {
+  if (typeof window === 'undefined') {
+    return defaultStats
+  }
+
+  try {
+    return normalizeStats(JSON.parse(window.localStorage.getItem(PRICE_GUESS_STATS_KEY)))
+  } catch {
+    return defaultStats
+  }
+}
+
+function saveStats(stats) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(PRICE_GUESS_STATS_KEY, JSON.stringify(stats))
+  } catch {
+    // Local storage can be blocked in private or restricted browser modes.
+  }
+}
 
 function formatPrice(price) {
   if (price >= 1000000) {
@@ -32,6 +82,14 @@ function formatCountdown(milliseconds) {
   return `${minutes}:${seconds}`
 }
 
+function getAccuracy(score, rounds) {
+  return rounds > 0 ? Math.round((score / rounds) * 100) : 0
+}
+
+function formatScore(score, rounds) {
+  return rounds > 0 ? `${score}/${rounds} (${getAccuracy(score, rounds)}%)` : '0/0'
+}
+
 function pickCardPair(pool) {
   const shuffled = [...pool].sort(() => Math.random() - 0.5)
   const pair = shuffled.slice(0, 2)
@@ -45,6 +103,40 @@ function pickCardPair(pool) {
   )
 
   return alternate && pair[0] ? [pair[0], alternate] : pair
+}
+
+function getPairKey(pair) {
+  if (pair.length !== 2) {
+    return ''
+  }
+
+  return pair
+    .map((card) => card.productId)
+    .sort()
+    .join('|')
+}
+
+function buildPairQueue(pool, lastPairKey = '') {
+  const pairs = []
+
+  for (let firstIndex = 0; firstIndex < pool.length; firstIndex += 1) {
+    for (let secondIndex = firstIndex + 1; secondIndex < pool.length; secondIndex += 1) {
+      if (pool[firstIndex].price !== pool[secondIndex].price) {
+        pairs.push([pool[firstIndex], pool[secondIndex]])
+      }
+    }
+  }
+
+  const queue = pairs.sort(() => Math.random() - 0.5)
+  const repeatIndex = queue.findIndex((pair) => getPairKey(pair) !== lastPairKey)
+
+  if (repeatIndex > 0) {
+    const firstPair = queue[0]
+    queue[0] = queue[repeatIndex]
+    queue[repeatIndex] = firstPair
+  }
+
+  return queue
 }
 
 function handleCardImageError(event) {
@@ -62,6 +154,7 @@ function handleCardImageError(event) {
 function PriceGuessPage() {
   const [cards, setCards] = useState([])
   const [cardPool, setCardPool] = useState([])
+  const [pairQueue, setPairQueue] = useState([])
   const [poolMeta, setPoolMeta] = useState(null)
   const [notice, setNotice] = useState('')
   const [apiError, setApiError] = useState('')
@@ -70,9 +163,8 @@ function PriceGuessPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [minPrice, setMinPrice] = useState(20)
   const [now, setNow] = useState(() => Date.now())
-  const [score, setScore] = useState(0)
-  const [streak, setStreak] = useState(0)
-  const [rounds, setRounds] = useState(0)
+  const [stats, setStats] = useState(loadSavedStats)
+  const { score, rounds, streak, bestStreak, bestScore, bestScoreRounds } = stats
 
   const higherCard = useMemo(() => {
     if (cards.length !== 2) {
@@ -110,13 +202,16 @@ function PriceGuessPage() {
       }
 
       setCardPool(data.cards)
-      setCards(pickCardPair(data.cards))
+      const nextPairQueue = buildPairQueue(data.cards)
+      setCards(nextPairQueue[0] ?? pickCardPair(data.cards))
+      setPairQueue(nextPairQueue.slice(1))
       setPoolMeta(data)
       setMinPrice(data.minPrice ?? 20)
       setNotice(data.notice ?? '')
     } catch (error) {
       setCards([])
       setCardPool([])
+      setPairQueue([])
       setPoolMeta(null)
       setNotice('')
       setApiError(error.message || 'PokéWallet prices are unavailable.')
@@ -130,12 +225,28 @@ function PriceGuessPage() {
   }, [loadPool])
 
   useEffect(() => {
+    saveStats(stats)
+  }, [stats])
+
+  useEffect(() => {
     const timer = window.setInterval(() => {
       setNow(Date.now())
     }, 1000)
 
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    if (!poolMeta?.nextRefreshAt || isLoading) {
+      return
+    }
+
+    const refreshAt = Date.parse(poolMeta.nextRefreshAt)
+
+    if (Number.isFinite(refreshAt) && now >= refreshAt) {
+      loadPool()
+    }
+  }, [isLoading, loadPool, now, poolMeta?.nextRefreshAt])
 
   function loadNextPair() {
     setSelectedId(null)
@@ -149,7 +260,13 @@ function PriceGuessPage() {
       return
     }
 
-    setCards(pickCardPair(cardPool))
+    const currentPairKey = getPairKey(cards)
+    const nextPairQueue =
+      pairQueue.length > 0 ? pairQueue : buildPairQueue(cardPool, currentPairKey)
+    const [nextPair, ...remainingPairs] = nextPairQueue
+
+    setCards(nextPair ?? pickCardPair(cardPool))
+    setPairQueue(remainingPairs)
   }
 
   function handleGuess(card) {
@@ -161,9 +278,38 @@ function PriceGuessPage() {
 
     setSelectedId(card.productId)
     setIsCorrect(correct)
-    setRounds((currentRounds) => currentRounds + 1)
-    setScore((currentScore) => currentScore + (correct ? 1 : 0))
-    setStreak((currentStreak) => (correct ? currentStreak + 1 : 0))
+    setStats((currentStats) => {
+      const current = normalizeStats(currentStats)
+      const nextScore = current.score + (correct ? 1 : 0)
+      const nextRounds = current.rounds + 1
+      const nextStreak = correct ? current.streak + 1 : 0
+      const bestScoreImproved =
+        nextScore > 0 &&
+        (nextScore > current.bestScore ||
+          (nextScore === current.bestScore &&
+            (current.bestScoreRounds === 0 || nextRounds < current.bestScoreRounds)))
+
+      return {
+        ...current,
+        score: nextScore,
+        rounds: nextRounds,
+        streak: nextStreak,
+        bestStreak: Math.max(current.bestStreak, nextStreak),
+        bestScore: bestScoreImproved ? nextScore : current.bestScore,
+        bestScoreRounds: bestScoreImproved ? nextRounds : current.bestScoreRounds,
+      }
+    })
+  }
+
+  function handleRestartScore() {
+    setStats((currentStats) => ({
+      ...normalizeStats(currentStats),
+      score: 0,
+      rounds: 0,
+      streak: 0,
+    }))
+    setSelectedId(null)
+    setIsCorrect(null)
   }
 
   return (
@@ -190,7 +336,19 @@ function PriceGuessPage() {
           <div className="price-game-score" aria-label="Game score">
             <span>Score</span>
             <strong>{score}/{rounds}</strong>
-            <span>Streak {streak}</span>
+            <span>{getAccuracy(score, rounds)}% correct</span>
+            <span>
+              Streak {streak} · Best {bestStreak}
+            </span>
+            <span>Best score {formatScore(bestScore, bestScoreRounds)}</span>
+            <button
+              type="button"
+              className="price-score-reset"
+              onClick={handleRestartScore}
+              disabled={rounds === 0 && streak === 0}
+            >
+              Restart score
+            </button>
           </div>
         </div>
 

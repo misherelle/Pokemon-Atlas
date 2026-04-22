@@ -99,6 +99,21 @@ function LineChart({ data, lines, currency = false, ariaLabel }) {
 
         {chartLines.map(({ line, path, points }) => {
           const activePoint = points.find((point) => point.key === activePointKey)
+          const tooltipX = activePoint
+            ? clamp(activePoint.x, tooltipWidth / 2 + 4, width - tooltipWidth / 2 - 4) -
+              tooltipWidth / 2
+            : 0
+          const tooltipFitsAbove = activePoint
+            ? activePoint.y - tooltipHeight - 10 >= 6
+            : true
+          const tooltipY = activePoint
+            ? tooltipFitsAbove
+              ? activePoint.y - tooltipHeight - 10
+              : activePoint.y + 14
+            : 0
+          const tooltipPointerX = activePoint
+            ? clamp(activePoint.x - tooltipX, 16, tooltipWidth - 16)
+            : tooltipWidth / 2
 
           return (
             <g key={line.key}>
@@ -138,23 +153,36 @@ function LineChart({ data, lines, currency = false, ariaLabel }) {
               {activePoint ? (
                 <g
                   className="chart-tooltip"
-                  transform={`translate(${
-                    clamp(activePoint.x, tooltipWidth / 2 + 4, width - tooltipWidth / 2 - 4) -
-                    tooltipWidth / 2
-                  } ${Math.max(10, activePoint.y - tooltipHeight - 18)})`}
+                  transform={`translate(${tooltipX} ${tooltipY})`}
                 >
-                  <rect
-                    width={tooltipWidth}
-                    height={tooltipHeight}
-                    rx="14"
-                    className="chart-tooltip-bg"
-                  />
-                  <text x="16" y="20" className="chart-tooltip-year">
-                    {activePoint.year}
-                  </text>
-                  <text x="16" y="38" className="chart-tooltip-value">
-                    {formatValue(activePoint.value, currency, line.unit)}
-                  </text>
+                  <g className="chart-tooltip-bubble">
+                    <path
+                      d={
+                        tooltipFitsAbove
+                          ? `M ${tooltipPointerX - 7} ${tooltipHeight - 1} L ${
+                              tooltipPointerX + 7
+                            } ${tooltipHeight - 1} L ${tooltipPointerX} ${
+                              tooltipHeight + 8
+                            } Z`
+                          : `M ${tooltipPointerX - 7} 1 L ${
+                              tooltipPointerX + 7
+                            } 1 L ${tooltipPointerX} -8 Z`
+                      }
+                      className="chart-tooltip-tip"
+                    />
+                    <rect
+                      width={tooltipWidth}
+                      height={tooltipHeight}
+                      rx="14"
+                      className="chart-tooltip-bg"
+                    />
+                    <text x="16" y="20" className="chart-tooltip-year">
+                      {activePoint.year}
+                    </text>
+                    <text x="16" y="38" className="chart-tooltip-value">
+                      {formatValue(activePoint.value, currency, line.unit)}
+                    </text>
+                  </g>
                 </g>
               ) : null}
             </g>

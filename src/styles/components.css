@@ -542,6 +542,11 @@
 
 .chart-tooltip {
   pointer-events: none;
+}
+
+.chart-tooltip-bubble {
+  transform-box: fill-box;
+  transform-origin: center;
   animation: chart-tooltip-pop 180ms ease-out both;
 }
 
@@ -550,6 +555,12 @@
   stroke: rgba(127, 109, 242, 0.2);
   stroke-width: 1.2;
   filter: drop-shadow(0 12px 18px rgba(80, 66, 138, 0.14));
+}
+
+.chart-tooltip-tip {
+  fill: rgba(255, 255, 255, 0.96);
+  stroke: rgba(127, 109, 242, 0.2);
+  stroke-width: 1.2;
 }
 
 .chart-tooltip-year {
@@ -869,8 +880,8 @@
 
 .price-game-score {
   display: grid;
-  gap: 4px;
-  min-width: 150px;
+  gap: 6px;
+  min-width: 210px;
   padding: 14px 16px;
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -886,6 +897,23 @@
   color: var(--heading);
   font-family: var(--display);
   font-size: 1.35rem;
+}
+
+.price-score-reset {
+  justify-self: start;
+  margin-top: 2px;
+  padding: 6px 10px;
+  border: 1px solid rgba(127, 109, 242, 0.16);
+  border-radius: 999px;
+  background: white;
+  color: var(--heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.price-score-reset:disabled {
+  opacity: 0.42;
+  cursor: default;
 }
 
 .price-game-note {
