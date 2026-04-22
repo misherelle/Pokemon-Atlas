@@ -20,6 +20,18 @@ function formatPrice(price) {
   return currencyFormatter.format(price)
 }
 
+function formatCountdown(milliseconds) {
+  if (milliseconds == null) {
+    return ''
+  }
+
+  const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = String(totalSeconds % 60).padStart(2, '0')
+
+  return `${minutes}:${seconds}`
+}
+
 function pickCardPair(pool) {
   const shuffled = [...pool].sort(() => Math.random() - 0.5)
   const pair = shuffled.slice(0, 2)
@@ -57,6 +69,7 @@ function PriceGuessPage() {
   const [isCorrect, setIsCorrect] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [minPrice, setMinPrice] = useState(20)
+  const [now, setNow] = useState(() => Date.now())
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
   const [rounds, setRounds] = useState(0)
@@ -68,6 +81,14 @@ function PriceGuessPage() {
 
     return cards[0].price >= cards[1].price ? cards[0] : cards[1]
   }, [cards])
+
+  const refreshCountdown = useMemo(() => {
+    if (!poolMeta?.nextRefreshAt) {
+      return ''
+    }
+
+    return formatCountdown(Date.parse(poolMeta.nextRefreshAt) - now)
+  }, [now, poolMeta?.nextRefreshAt])
 
   const loadPool = useCallback(async () => {
     setIsLoading(true)
@@ -107,6 +128,14 @@ function PriceGuessPage() {
   useEffect(() => {
     loadPool()
   }, [loadPool])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(Date.now())
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [])
 
   function loadNextPair() {
     setSelectedId(null)
@@ -249,8 +278,14 @@ function PriceGuessPage() {
           </button>
           <span>
             Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
-            other. Refreshes every {poolMeta?.cacheMinutes ?? 10} min. Cards above{' '}
-            {formatPrice(minPrice)}. Source: PokéWallet API.
+            other. Refreshes every {poolMeta?.cacheMinutes ?? 10} min
+            {refreshCountdown ? (
+              <>
+                {' '}
+                <strong className="price-refresh-countdown">({refreshCountdown} left)</strong>
+              </>
+            ) : null}
+            . Cards above {formatPrice(minPrice)}. Source: PokéWallet API.
           </span>
         </div>
 

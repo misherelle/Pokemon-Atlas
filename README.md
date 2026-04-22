@@ -38,6 +38,8 @@ POKEWALLET_SEARCHES_PER_REFRESH=8
 POKEWALLET_MAX_CARDS_PER_QUERY=3
 POKEWALLET_IMAGE_CACHE_MINUTES=60
 POKEWALLET_ENGLISH_ONLY=true
+POKEWALLET_REQUIRE_IMAGES=true
+POKEWALLET_IMAGE_CHECKS_PER_REFRESH=5
 POKEWALLET_SEARCH_QUERIES=all-pokemon
 ```
 
@@ -49,7 +51,7 @@ For Vercel:
 4. Add the PokéWallet values in Project Settings -> Environment Variables.
 5. Deploy. If you edit an env var later, redeploy so the new value is used.
 
-The game builds a 15-card pool from PokéWallet at most once every 10 minutes. By default, `POKEWALLET_SEARCH_QUERIES=all-pokemon` samples from a built-in list of 1,025 Pokémon names, with a few high-value search terms mixed in so the $20 filter still finds cards. It filters out sealed products like packs, boxes, tins, displays, collections, and non-English set patterns. The browser then compares cards from that cached pool, so normal play does not call the price API on every guess.
+The game builds a 15-card pool from PokéWallet at most once every 10 minutes. By default, `POKEWALLET_SEARCH_QUERIES=all-pokemon` samples from a built-in list of 1,025 Pokémon names, with a few high-value search terms mixed in so the $20 filter still finds cards. It filters out sealed products like packs, boxes, tins, displays, collections, and non-English set patterns. It also removes cards already known to have missing images and can pre-check a small image batch with `POKEWALLET_IMAGE_CHECKS_PER_REFRESH`. The browser then compares cards from that cached pool, so normal play does not call the price API on every guess.
 
 The API code follows PokéWallet's documented key flow:
 

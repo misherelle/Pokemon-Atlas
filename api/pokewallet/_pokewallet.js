@@ -11,6 +11,10 @@ const DEFAULT_SEARCHES_PER_REFRESH = 8
 const DEFAULT_MAX_CARDS_PER_QUERY = 3
 const DEFAULT_IMAGE_CACHE_MINUTES = 60
 const DEFAULT_ENGLISH_ONLY = true
+const DEFAULT_REQUIRE_IMAGES = true
+const DEFAULT_IMAGE_CHECKS_PER_REFRESH = 5
+const IMAGE_CHECK_BATCH_SIZE = 3
+const FILTER_VERSION = 2
 
 const prioritySearchQueries = [
   'charizard ex',
@@ -74,14 +78,17 @@ const sealedProductPatterns = [
 ]
 
 const nonEnglishSetPatterns = [
+  /[\u3040-\u30ff\u3400-\u9fff]/,
   /\b(?:japanese|japan|korean|chinese|thai|indonesian|german|french|italian|spanish|portuguese)\b/i,
-  /^(?:S-P|XY-P|SM\d+[a-z]|SV\d+[a-z]|M\d+|CP\d+|BW\d+[a-z]|XY\d+[a-z]|DP\d+[a-z])\s*[:_]/i,
-  /\b(?:pokemon card 151|expansion pack|night unison|ninja spinner|shiny treasure|vstar universe|terastal festival|eevee heroes|tag bolt|dream league|lost abyss|clay burst|snow hazard|raging surf|ancient roar|future flash|wild force|cyber judge|battle partners)\b/i,
-  /\b(?:S-P|XY-P|SM-P|SV-P)\b/i,
+  /\b(?:SM|SV|S|XY|BW|DP|M|CP)\d+[A-Z]?\s*[:_]/i,
+  /\b(?:pokemon card 151|expansion pack|gx ultra shiny|ultra shiny|shiny treasure|shiny star v|vstar universe|terastal festival|eevee heroes|tag bolt|tag team gx all stars|dream league|lost abyss|clay burst|snow hazard|raging surf|ancient roar|future flash|wild force|cyber judge|battle partners|night unison|ninja spinner|remix bout|miracle twin|full metal wall|sky legend|double blaze|dark phantasma|paradigm trigger|star birth|incandescent arcana|battle region|space juggler|time gazer|dark order|gift box|quarter deck|half deck)\b/i,
+  /\b(?:S-P|XY-P|SM-P|SV-P|BW-P|DP-P|PCG-P|ADV-P|L-P)\b/i,
+  /\bpromotional cards\b/i,
 ]
 
 let poolCache = null
 const imageCache = new Map()
+const imageAvailabilityCache = new Map()
 let requestWindow = {
   startedAt: 0,
   used: 0,
@@ -243,6 +250,52 @@ function getSearchQueries(config, now = Date.now()) {
   return seededQueries.slice(0, config.searchesPerRefresh)
 }
 
+function getImageCacheKey(cardId, size = 'low') {
+  return `${cardId}:${size === 'high' ? 'high' : 'low'}`
+}
+
+function setImageAvailability(cardId, size, available, config, now = Date.now()) {
+  imageAvailabilityCache.set(getImageCacheKey(cardId, size), {
+    available,
+    expiresAt: now + config.imageCacheMinutes * 60 * 1000,
+  })
+}
+
+function getCachedImageAvailability(cardId, size = 'low', now = Date.now()) {
+  const cacheKey = getImageCacheKey(cardId, size)
+  const cached = imageAvailabilityCache.get(cacheKey)
+
+  if (!cached) {
+    return null
+  }
+
+  if (cached.expiresAt <= now) {
+    imageAvailabilityCache.delete(cacheKey)
+    return null
+  }
+
+  return cached.available
+}
+
+function isKnownMissingImage(cardId, config) {
+  return config.requireImages && getCachedImageAvailability(cardId) === false
+}
+
+function getPoolCacheKey(config) {
+  return [
+    config.minPrice,
+    config.poolSize,
+    config.cacheMinutes,
+    config.searchesPerRefresh,
+    config.maxCardsPerQuery,
+    config.englishOnly,
+    config.requireImages,
+    config.imageChecksPerRefresh,
+    FILTER_VERSION,
+    hashText(config.searchQueries.join('|')),
+  ].join(':')
+}
+
 function normalizeCard(card, config) {
   const info = card.card_info ?? {}
 
@@ -253,7 +306,8 @@ function normalizeCard(card, config) {
     !card.id ||
     !info.name ||
     !isSingleCard(card) ||
-    (config.englishOnly && !isEnglishCard(card))
+    (config.englishOnly && !isEnglishCard(card)) ||
+    (config.requireImages && isKnownMissingImage(card.id, config))
   ) {
     return null
   }
@@ -371,6 +425,11 @@ export function getPokeWalletConfig(env = processEnv) {
       DEFAULT_MAX_CARDS_PER_QUERY,
     ),
     englishOnly: booleanFromEnv(env.POKEWALLET_ENGLISH_ONLY, DEFAULT_ENGLISH_ONLY),
+    requireImages: booleanFromEnv(env.POKEWALLET_REQUIRE_IMAGES, DEFAULT_REQUIRE_IMAGES),
+    imageChecksPerRefresh: numberFromEnv(
+      env.POKEWALLET_IMAGE_CHECKS_PER_REFRESH,
+      DEFAULT_IMAGE_CHECKS_PER_REFRESH,
+    ),
     minPrice: numberFromEnv(env.POKEWALLET_MIN_PRICE, DEFAULT_MIN_PRICE),
     poolSize: numberFromEnv(env.POKEWALLET_POOL_SIZE, DEFAULT_POOL_SIZE),
     searchQueries,
@@ -380,6 +439,16 @@ export function getPokeWalletConfig(env = processEnv) {
   config.maxHourlyRequests = Math.min(config.maxHourlyRequests, HOURLY_REQUEST_CEILING)
   config.searchesPerRefresh = Math.min(config.searchesPerRefresh, queryCount)
   config.maxCardsPerQuery = Math.min(config.maxCardsPerQuery, config.poolSize)
+
+  const refreshesPerHour = Math.max(1, Math.ceil(60 / config.cacheMinutes))
+  const requestBudgetPerRefresh = Math.floor(config.maxHourlyRequests / refreshesPerHour)
+  const imageRequestBudget = Math.max(
+    0,
+    requestBudgetPerRefresh - config.searchesPerRefresh - 2,
+  )
+  config.imageChecksPerRefresh = config.requireImages
+    ? Math.min(config.imageChecksPerRefresh, imageRequestBudget)
+    : 0
 
   return config
 }
@@ -429,40 +498,117 @@ async function pokewalletRequest(config, path, options = {}) {
   )
 }
 
-async function fetchPool(config) {
-  const queries = getSearchQueries(config)
-  const seen = new Set()
-  const cards = []
+async function fetchCardsForQuery(query, config) {
+  const params = new URLSearchParams({
+    q: query,
+    page: '1',
+    limit: '100',
+  })
 
-  for (const query of queries) {
-    const params = new URLSearchParams({
-      q: query,
-      page: '1',
-      limit: '100',
-    })
+  const response = await pokewalletRequest(config, `/search?${params}`)
+  const data = await response.json()
+  const cards = (data.results ?? [])
+    .map((card) => normalizeCard(card, config))
+    .filter((card) => card && card.price >= config.minPrice)
 
-    const response = await pokewalletRequest(config, `/search?${params}`)
-    const data = await response.json()
+  return {
+    query,
+    cards: shuffle(cards),
+  }
+}
 
-    const normalizedCards = (data.results ?? []).map((card) => normalizeCard(card, config))
+async function hasCardImage(card, config) {
+  const cached = getCachedImageAvailability(card.productId)
 
-    const filteredCards = shuffle(normalizedCards).filter((card) => {
-      if (!card || card.price < config.minPrice || seen.has(card.productId)) {
-        return false
+  if (cached != null) {
+    return cached
+  }
+
+  try {
+    await fetchCardImage(card.productId, 'low', config)
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function preferCardsWithImages(cards, config) {
+  if (!config.requireImages || config.imageChecksPerRefresh <= 0) {
+    return cards
+  }
+
+  const confirmed = []
+  const unchecked = []
+  let checkedCount = 0
+
+  for (let index = 0; index < cards.length; index += IMAGE_CHECK_BATCH_SIZE) {
+    const checksRemaining = config.imageChecksPerRefresh - checkedCount
+
+    if (checksRemaining <= 0) {
+      unchecked.push(...cards.slice(index))
+      break
+    }
+
+    const batch = cards.slice(
+      index,
+      index + Math.min(IMAGE_CHECK_BATCH_SIZE, checksRemaining),
+    )
+    checkedCount += batch.length
+
+    const checkedCards = await Promise.all(
+      batch.map(async (card) => ({
+        card,
+        hasImage: await hasCardImage(card, config),
+      })),
+    )
+
+    for (const checkedCard of checkedCards) {
+      if (checkedCard.hasImage) {
+        confirmed.push(checkedCard.card)
       }
+    }
 
-      seen.add(card.productId)
-      return true
-    })
-
-    console.log('pokewallet filtered count:', query, filteredCards.length)
-
-    cards.push(...filteredCards.slice(0, config.maxCardsPerQuery))
-
-    if (cards.length >= config.poolSize) {
+    if (confirmed.length >= config.poolSize) {
+      unchecked.push(...cards.slice(index + batch.length))
       break
     }
   }
+
+  if (confirmed.length < 2) {
+    return cards
+  }
+
+  return [...confirmed, ...unchecked].slice(0, config.poolSize)
+}
+
+async function fetchPool(config) {
+  const queries = getSearchQueries(config)
+  const queryResults = await Promise.all(
+    queries.map((query) => fetchCardsForQuery(query, config)),
+  )
+  const seen = new Set()
+  const candidates = []
+  const cardsPerQuery = config.maxCardsPerQuery
+
+  for (const result of queryResults) {
+    let cardsFromQuery = 0
+
+    for (const card of result.cards) {
+      if (seen.has(card.productId)) {
+        continue
+      }
+
+      seen.add(card.productId)
+      candidates.push(card)
+      cardsFromQuery += 1
+
+      if (cardsFromQuery >= cardsPerQuery || candidates.length >= config.poolSize * 2) {
+        break
+      }
+    }
+  }
+
+  const cards = await preferCardsWithImages(shuffle(candidates), config)
 
   if (cards.length === 0) {
     throw new Error('PokeWallet returned no usable priced single cards.')
@@ -477,8 +623,9 @@ async function fetchPool(config) {
 export async function getCardPool(env = processEnv) {
   const config = getPokeWalletConfig(env)
   const now = Date.now()
+  const cacheKey = getPoolCacheKey(config)
 
-  if (poolCache && poolCache.expiresAt > now) {
+  if (poolCache && poolCache.expiresAt > now && poolCache.cacheKey === cacheKey) {
     return {
       ...poolCache.payload,
       cached: true,
@@ -503,12 +650,15 @@ export async function getCardPool(env = processEnv) {
       'single cards only',
       'sealed products removed',
       ...(config.englishOnly ? ['English TCGplayer cards only'] : []),
+      ...(config.requireImages ? ['cards with working images preferred'] : []),
     ],
+    imageChecksPerRefresh: config.imageChecksPerRefresh,
     refreshedAt,
     nextRefreshAt: new Date(expiresAt).toISOString(),
   }
 
   poolCache = {
+    cacheKey,
     expiresAt,
     payload,
   }
@@ -521,45 +671,66 @@ export async function getCardPool(env = processEnv) {
   }
 }
 
-export async function getCardImage(cardId, size = 'low', env = processEnv) {
-  const config = getPokeWalletConfig(env)
+async function fetchCardImage(cardId, size = 'low', config) {
   const imageSize = size === 'high' ? 'high' : 'low'
-  const cacheKey = `${cardId}:${imageSize}`
+  const cacheKey = getImageCacheKey(cardId, imageSize)
   const cachedImage = imageCache.get(cacheKey)
   const now = Date.now()
 
   if (cachedImage && cachedImage.expiresAt > now) {
+    setImageAvailability(cardId, imageSize, true, config, now)
     return cachedImage.image
   }
 
-  const response = await pokewalletRequest(
-    config,
-    `/images/${encodeURIComponent(cardId)}?size=${imageSize}`,
-    {
-      accept: 'image/jpeg,image/png,image/*',
-    },
-  )
+  try {
+    const response = await pokewalletRequest(
+      config,
+      `/images/${encodeURIComponent(cardId)}?size=${imageSize}`,
+      {
+        accept: 'image/jpeg,image/png,image/*',
+      },
+    )
 
-  const image = {
-    contentType: response.headers.get('content-type') || 'image/jpeg',
-    buffer: await response.arrayBuffer(),
+    const image = {
+      contentType: response.headers.get('content-type') || 'image/jpeg',
+      buffer: await response.arrayBuffer(),
+    }
+
+    if (!image.contentType.toLowerCase().startsWith('image/')) {
+      setImageAvailability(cardId, imageSize, false, config, now)
+      throw new Error('PokéWallet returned a non-image response for this card.')
+    }
+
+    imageCache.set(cacheKey, {
+      expiresAt: now + config.imageCacheMinutes * 60 * 1000,
+      image,
+    })
+    setImageAvailability(cardId, imageSize, true, config, now)
+
+    return image
+  } catch (error) {
+    if (
+      !error.upstream ||
+      (error.upstream.status !== 401 &&
+        error.upstream.status !== 403 &&
+        error.upstream.status !== 429)
+    ) {
+      setImageAvailability(cardId, imageSize, false, config, now)
+    }
+
+    throw error
   }
+}
 
-  if (!image.contentType.toLowerCase().startsWith('image/')) {
-    throw new Error('PokéWallet returned a non-image response for this card.')
-  }
-
-  imageCache.set(cacheKey, {
-    expiresAt: now + config.imageCacheMinutes * 60 * 1000,
-    image,
-  })
-
-  return image
+export async function getCardImage(cardId, size = 'low', env = processEnv) {
+  return fetchCardImage(cardId, size, getPokeWalletConfig(env))
 }
 
 export function getStatus(env = processEnv) {
   const config = getPokeWalletConfig(env)
   const now = Date.now()
+  const cacheKey = getPoolCacheKey(config)
+  const hasMatchingCache = poolCache?.expiresAt > now && poolCache.cacheKey === cacheKey
 
   return {
     configured: Boolean(config.apiKey),
@@ -571,11 +742,13 @@ export function getStatus(env = processEnv) {
     searchesPerRefresh: config.searchesPerRefresh,
     maxCardsPerQuery: config.maxCardsPerQuery,
     englishOnly: config.englishOnly,
+    requireImages: config.requireImages,
+    imageChecksPerRefresh: config.imageChecksPerRefresh,
     minPrice: config.minPrice,
     poolSize: config.poolSize,
     searchQueryCount: config.searchQueries.length,
-    cachedCards: poolCache?.expiresAt > now ? poolCache.payload.cards.length : 0,
-    nextRefreshAt: poolCache?.expiresAt > now ? poolCache.payload.nextRefreshAt : null,
+    cachedCards: hasMatchingCache ? poolCache.payload.cards.length : 0,
+    nextRefreshAt: hasMatchingCache ? poolCache.payload.nextRefreshAt : null,
     requestsUsedThisHour: getRateWindow(now).used,
   }
 }

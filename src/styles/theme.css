@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Silom Web';
-  src: url('/fonts/SilomBol.ttf') format('truetype');
+  src: url('/fonts/Silom.ttf') format('truetype');
   font-display: swap;
   font-style: normal;
   font-weight: 400;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: 'Silom Web';
-  src: url('/fonts/SilomBol.ttf') format('truetype');
+  src: url('/fonts/Silom.ttf') format('truetype');
   font-display: swap;
   font-style: normal;
   font-weight: 700;
