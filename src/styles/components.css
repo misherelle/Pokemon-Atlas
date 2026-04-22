@@ -466,6 +466,10 @@
   border-radius: 50%;
 }
 
+.timeline-popup-close {
+  display: none;
+}
+
 .timeline-popup-date {
   margin: 0 0 6px;
   color: var(--text-soft);
@@ -2017,6 +2021,23 @@
     border-radius: 16px;
     pointer-events: auto;
     transform: none !important;
+  }
+
+  .timeline-popup-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(127, 109, 242, 0.14);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--heading);
+    font-size: 1rem;
+    line-height: 1;
+    touch-action: manipulation;
   }
 
   .timeline-popup::after {

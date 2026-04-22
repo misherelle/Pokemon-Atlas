@@ -1127,6 +1127,14 @@ function HistoryTimeline({ events }) {
               style={popupStyle}
               aria-live="polite"
             >
+              <button
+                type="button"
+                className="timeline-popup-close"
+                aria-label="Close timeline detail"
+                onClick={() => setActiveId(null)}
+              >
+                ×
+              </button>
               <span
                 className="timeline-popup-chip"
                 style={{ backgroundColor: categoryColors[activeEvent.category] }}

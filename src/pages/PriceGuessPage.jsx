@@ -473,6 +473,7 @@ function PriceGuessPage() {
               .
             </span>
             <span className="price-game-meta-line">
+              If it says “Loading card...” and not an error, give it a second.
               Cards above {formatPrice(minPrice)}. Source: PokéWallet API.
             </span>
           </span>
