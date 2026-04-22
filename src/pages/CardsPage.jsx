@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import SectionBlock from '../components/SectionBlock.jsx'
 import VisualSlot from '../components/VisualSlot.jsx'
 import {
@@ -119,6 +119,24 @@ function PriceHistoryChart({ points }) {
 }
 
 function CardsPage() {
+  const [zoomedImage, setZoomedImage] = useState(null)
+
+  useEffect(() => {
+    if (!zoomedImage) {
+      return undefined
+    }
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setZoomedImage(null)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [zoomedImage])
+
   return (
     <div className="page-stack">
       <section className="page-hero compact-hero card-files-hero">
@@ -149,6 +167,14 @@ function CardsPage() {
                 compact
                 src={card.imageSrc}
                 alt={card.imageAlt}
+                onZoom={() =>
+                  setZoomedImage({
+                    src: card.imageSrc,
+                    alt: card.imageAlt,
+                    title: card.name,
+                    note: card.year,
+                  })
+                }
               />
               <div className="top-ten-copy">
                 <h3>{card.name}</h3>
@@ -178,6 +204,14 @@ function CardsPage() {
                   hint="Card front"
                   src={card.imageSrc}
                   alt={card.imageAlt}
+                  onZoom={() =>
+                    setZoomedImage({
+                      src: card.imageSrc,
+                      alt: card.imageAlt,
+                      title: card.name,
+                      note: card.subtitle,
+                    })
+                  }
                 />
 
                 <div className="case-study-info">
@@ -222,6 +256,36 @@ function CardsPage() {
           ))}
         </div>
       </SectionBlock>
+
+      {zoomedImage ? (
+        <div
+          className="image-modal-backdrop"
+          role="presentation"
+          onClick={() => setZoomedImage(null)}
+        >
+          <div
+            className="image-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${zoomedImage.title} larger image`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="image-modal-close"
+              aria-label="Close larger image"
+              onClick={() => setZoomedImage(null)}
+            >
+              ×
+            </button>
+            <img src={zoomedImage.src} alt={zoomedImage.alt} />
+            <div className="image-modal-copy">
+              <strong>{zoomedImage.title}</strong>
+              <span>{zoomedImage.note}</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -20,7 +20,7 @@ function HistoryPage() {
       <SectionBlock
         eyebrow="Timeline"
         title="30 key moments"
-        body="Hover to see what changed and when."
+        body="Tap or hover to see what changed and when."
       >
         <HistoryTimeline events={timelineEvents} />
       </SectionBlock>

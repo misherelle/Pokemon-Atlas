@@ -1,32 +1,39 @@
-# From Playground to Marketplace
+# Pokémon Card Atlas
 
-## The Rise and Impact of the Pokemon Trading Card Game
+A small React project about Pokémon cards, collecting, and why some cards became so valuable.
 
-This project is now structured as a lightweight multi-page React site with separate pages for overview, timeline, data story, and collecting systems.
+Live site: [pokemon-atlas.vercel.app](https://pokemon-atlas.vercel.app/)
 
-### Project structure
+## What This Is
 
-- `src/App.jsx`: simple hash-based page router
-- `src/pages/`: page-level content
-- `src/components/`: reusable UI pieces like the hero, charts, and layout
-- `src/data/siteData.js`: starter content and placeholder chart data
-- `src/styles/`: split styling files for theme, layout, components, and page-level rules
-- `public/images/`: placeholder visuals you can replace with your own Pokemon images
+This site is meant to be a visual guide, not a full database. It has a timeline, market charts, collecting notes, card examples, and a price guessing game that uses live card data.
 
-### Current pages
+The main idea is simple: show how Pokémon cards moved from a kids' game into a huge collector market.
 
-- `#/` overview
-- `#/history` timeline and cultural rise
-- `#/market` data story and value trends
-- `#/collection` rarity, grading, and comparison systems
-- `#/cards` card examples and sale context
-- `#/game` Price Guess card value game
+## Pages
 
-### PokéWallet API
+- **Home**: quick intro and a few big numbers
+- **Timeline**: major Pokémon card moments from 1996 to 2026
+- **Market**: simple charts about production and growth
+- **Collecting**: rarity, grading, and why condition matters
+- **Card Files**: a closer look at famous or expensive cards
+- **Price Guess**: pick which card has the higher market price
 
-`#/game` uses `/api/pokewallet/pool`, `/api/pokewallet/status`, and `/api/pokewallet/images?id=...`, which are Vercel-ready serverless functions. The PokéWallet key stays on the server and is never exposed to React.
+## Price Guess
 
-For local setup, copy `.env.example` to `.env.local`, add your PokéWallet key, then restart `npm run dev`.
+The game uses the PokéWallet API through Vercel serverless functions, so the API key stays private on the server.
+
+It builds a pool of priced single cards, filters out sealed products, prefers English cards with working images, and then lets the user compare two cards at a time. The pool refreshes on real 10-minute clock marks, like `:00`, `:10`, `:20`, and so on.
+
+## Local Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create `.env.local` from `.env.example`, then add your PokéWallet key:
 
 ```bash
 POKEWALLET_API_KEY=your_key
@@ -43,38 +50,39 @@ POKEWALLET_IMAGE_CHECKS_PER_REFRESH=5
 POKEWALLET_SEARCH_QUERIES=all-pokemon
 ```
 
-For Vercel:
-
-1. Push this repo to GitHub.
-2. In Vercel, choose Add New -> Project and import the GitHub repo.
-3. Keep the defaults: Framework Preset `Vite`, Build Command `npm run build`, Output Directory `dist`.
-4. Add the PokéWallet values in Project Settings -> Environment Variables.
-5. Deploy. If you edit an env var later, redeploy so the new value is used.
-
-The game builds a 15-card pool from PokéWallet at most once every 10 minutes. By default, `POKEWALLET_SEARCH_QUERIES=all-pokemon` samples from a built-in list of 1,025 Pokémon names, with a few high-value search terms mixed in so the $20 filter still finds cards. It filters out sealed products like packs, boxes, tins, displays, collections, and non-English set patterns. It also removes cards already known to have missing images and can pre-check a small image batch with `POKEWALLET_IMAGE_CHECKS_PER_REFRESH`. The browser then compares cards from that cached pool, so normal play does not call the price API on every guess.
-
-The API code follows PokéWallet's documented key flow:
-
-- `GET https://api.pokewallet.io/search` for card and price data
-- `GET https://api.pokewallet.io/images/:id` through a server proxy for card images
-
-If keys are not configured or live prices are unavailable, the game shows a setup message. `POKEWALLET_MIN_PRICE` controls the minimum live price for cards in the pool.
-
-### Notes
-
-- The palette now follows your lavender-to-cream gradient reference: `#acc0f9` to `#fdf1ed`.
-- A floating back-to-top button appears after scrolling so navigation stays manageable on longer pages.
-- The current image files can be swapped with your own scans, screenshots, or Pokemon art later.
-
-### Run locally
+Run the site:
 
 ```bash
 npm run dev
 ```
 
-### Checks
+## Vercel Setup
+
+1. Push the project to GitHub.
+2. Import it into Vercel.
+3. Keep the Vite defaults:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+4. Add the same PokéWallet values in Vercel under Project Settings -> Environment Variables.
+5. Redeploy after changing env vars, because Vercel needs a fresh deploy to use them.
+
+## Project Files
+
+- `src/App.jsx`: page routing
+- `src/pages/`: the main pages
+- `src/components/`: timeline, charts, layout, and shared UI
+- `src/data/siteData.js`: timeline and page data
+- `src/styles/`: theme and layout CSS
+- `api/pokewallet/`: serverless API routes for the price game
+- `public/images/`: local images and fallback artwork
+
+## Checks
 
 ```bash
-npm run build
 npm run lint
+npm run build
 ```
+
+## Notes
+
+Some live card data can vary depending on what PokéWallet returns. The app tries to keep the game clean by filtering for single cards, English cards, and working images, but the fallback image is still there in case an API image is missing.

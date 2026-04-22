@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -152,7 +152,6 @@ function handleCardImageError(event) {
 }
 
 function PriceGuessPage() {
-  const autoRefreshReloaded = useRef(false)
   const [cards, setCards] = useState([])
   const [cardPool, setCardPool] = useState([])
   const [pairQueue, setPairQueue] = useState([])
@@ -165,6 +164,7 @@ function PriceGuessPage() {
   const [minPrice, setMinPrice] = useState(20)
   const [now, setNow] = useState(() => Date.now())
   const [stats, setStats] = useState(loadSavedStats)
+  const [isRefreshPromptOpen, setIsRefreshPromptOpen] = useState(false)
   const { score, rounds, streak, bestStreak, bestScore, bestScoreRounds } = stats
 
   const higherCard = useMemo(() => {
@@ -183,11 +183,22 @@ function PriceGuessPage() {
     return formatCountdown(Date.parse(poolMeta.nextRefreshAt) - now)
   }, [now, poolMeta?.nextRefreshAt])
 
+  const isPoolExpired = useMemo(() => {
+    if (!poolMeta?.nextRefreshAt) {
+      return false
+    }
+
+    const refreshAt = Date.parse(poolMeta.nextRefreshAt)
+
+    return Number.isFinite(refreshAt) && now >= refreshAt
+  }, [now, poolMeta?.nextRefreshAt])
+
   const loadPool = useCallback(async () => {
     setIsLoading(true)
     setSelectedId(null)
     setIsCorrect(null)
     setApiError('')
+    setIsRefreshPromptOpen(false)
 
     try {
       const response = await fetch('/api/pokewallet/pool')
@@ -237,19 +248,6 @@ function PriceGuessPage() {
     return () => window.clearInterval(timer)
   }, [])
 
-  useEffect(() => {
-    if (!poolMeta?.nextRefreshAt || isLoading || autoRefreshReloaded.current) {
-      return
-    }
-
-    const refreshAt = Date.parse(poolMeta.nextRefreshAt)
-
-    if (Number.isFinite(refreshAt) && now >= refreshAt + 1500) {
-      autoRefreshReloaded.current = true
-      window.location.reload()
-    }
-  }, [isLoading, now, poolMeta?.nextRefreshAt])
-
   function loadNextPair() {
     setSelectedId(null)
     setIsCorrect(null)
@@ -258,7 +256,7 @@ function PriceGuessPage() {
       !cardPool.length ||
       (poolMeta?.nextRefreshAt && Date.now() >= Date.parse(poolMeta.nextRefreshAt))
     ) {
-      window.location.reload()
+      setIsRefreshPromptOpen(true)
       return
     }
 
@@ -451,16 +449,33 @@ function PriceGuessPage() {
           </button>
           <span>
             Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
-            other. Refreshes every {poolMeta?.cacheMinutes ?? 10} min
-            {refreshCountdown ? (
-              <>
-                {' '}
-                <strong className="price-refresh-countdown">({refreshCountdown} left)</strong>
-              </>
+            other. New pools are ready on the clock every 10 minutes (:00, :10,
+            :20...)
+            {poolMeta?.nextRefreshAt ? (
+              refreshCountdown && !isPoolExpired ? (
+                <>
+                  {' '}
+                  <strong className="price-refresh-countdown">({refreshCountdown} left)</strong>
+                </>
+              ) : (
+                <strong className="price-refresh-countdown"> (ready now)</strong>
+              )
             ) : null}
             . Cards above {formatPrice(minPrice)}. Source: PokéWallet API.
           </span>
         </div>
+
+        {isPoolExpired || isRefreshPromptOpen ? (
+          <div className="price-refresh-prompt" role="status">
+            <div>
+              <strong>New cards are ready.</strong>
+              <p>This pool stays still until you refresh, so the game will not loop on its own.</p>
+            </div>
+            <button type="button" onClick={() => window.location.reload()}>
+              Refresh cards
+            </button>
+          </div>
+        ) : null}
 
         {isCorrect != null ? (
           <p className={`price-game-result${isCorrect ? ' is-correct' : ' is-wrong'}`}>

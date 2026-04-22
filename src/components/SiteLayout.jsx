@@ -1,13 +1,12 @@
-import { useState } from 'react'
 import BackToTopButton from './BackToTopButton.jsx'
 
 const navigation = [
-  { href: '#/', label: 'Home' },
-  { href: '#/history', label: 'Timeline' },
-  { href: '#/market', label: 'Market' },
-  { href: '#/collection', label: 'Collecting' },
-  { href: '#/cards', label: 'Card Files' },
-  { href: '#/game', label: 'Price Guess' },
+  { href: '#/', label: 'Home', icon: 'home' },
+  { href: '#/history', label: 'Timeline', icon: 'timeline' },
+  { href: '#/market', label: 'Market', icon: 'market' },
+  { href: '#/collection', label: 'Collecting', icon: 'collection' },
+  { href: '#/cards', label: 'Card Files', icon: 'cards' },
+  { href: '#/game', label: 'Price Guess', icon: 'game' },
 ]
 
 const leftSideNavigation = [
@@ -22,8 +21,64 @@ const rightSideNavigation = [
   { href: '#/game', label: 'Price Guess', pixel: 'PLAY' },
 ]
 
+function MobileNavIcon({ name }) {
+  if (name === 'home') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 11.5 12 5l8 6.5" />
+        <path d="M7 10.5V20h10v-9.5" />
+      </svg>
+    )
+  }
+
+  if (name === 'timeline') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 12h16" />
+        <circle cx="7" cy="12" r="2.2" />
+        <circle cx="13" cy="12" r="2.2" />
+        <circle cx="19" cy="12" r="2.2" />
+      </svg>
+    )
+  }
+
+  if (name === 'market') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 18 9 12l4 3 7-9" />
+        <path d="M4 20h16" />
+      </svg>
+    )
+  }
+
+  if (name === 'collection') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="7" />
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    )
+  }
+
+  if (name === 'cards') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="5" y="7" width="10" height="13" rx="2" />
+        <path d="M9 4h8a2 2 0 0 1 2 2v11" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 12h10" />
+      <path d="M12 7v10" />
+      <circle cx="12" cy="12" r="8" />
+    </svg>
+  )
+}
+
 function SiteLayout({ children, route }) {
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const currentIndex = navigation.findIndex((item) => item.href.replace('#', '') === route)
   const hasValidIndex = currentIndex >= 0
   const previousPage = hasValidIndex
@@ -118,61 +173,26 @@ function SiteLayout({ children, route }) {
               </a>
             ))}
           </nav>
-
-          <button
-            type="button"
-            className="mobile-menu-button"
-            aria-label={isMobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={isMobileNavOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setIsMobileNavOpen((isOpen) => !isOpen)}
-          >
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
-          </button>
-
-          {isMobileNavOpen ? (
-            <nav
-              id="mobile-navigation"
-              className="mobile-menu is-open"
-              aria-label="Mobile navigation"
-            >
-              <div className="mobile-menu-arrows">
-                {previousPage ? (
-                  <a href={previousPage.href} onClick={() => setIsMobileNavOpen(false)}>
-                    <strong>&larr; Prev</strong>
-                    <span>{previousPage.label}</span>
-                  </a>
-                ) : null}
-                {nextPage ? (
-                  <a href={nextPage.href} onClick={() => setIsMobileNavOpen(false)}>
-                    <strong>Next &rarr;</strong>
-                    <span>{nextPage.label}</span>
-                  </a>
-                ) : null}
-              </div>
-
-              <div className="mobile-menu-links">
-                {navigation.map((item) => (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    className={route === item.href.replace('#', '') ? 'is-active' : ''}
-                    onClick={() => setIsMobileNavOpen(false)}
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </div>
-            </nav>
-          ) : null}
         </header>
 
         <main>{children}</main>
 
         <BackToTopButton />
       </div>
+
+      <nav className="mobile-bottom-nav" aria-label="Mobile page navigation">
+        {navigation.map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            className={route === item.href.replace('#', '') ? 'is-active' : ''}
+            aria-label={item.label}
+          >
+            <MobileNavIcon name={item.icon} />
+            <span>{item.label}</span>
+          </a>
+        ))}
+      </nav>
     </>
   )
 }

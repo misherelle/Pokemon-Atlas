@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 const categoryColors = {
   franchise: '#5631c7',
@@ -580,11 +580,44 @@ function getHorizontalAlign(event, width) {
   return 'center'
 }
 
+const minTimelineZoom = 0.5
+const maxTimelineZoom = 1.45
+
+function getPointerCenter(points) {
+  const total = points.reduce(
+    (position, point) => ({
+      x: position.x + point.x,
+      y: position.y + point.y,
+    }),
+    { x: 0, y: 0 },
+  )
+
+  return {
+    x: total.x / points.length,
+    y: total.y / points.length,
+  }
+}
+
+function getPointerDistance(points) {
+  if (points.length < 2) {
+    return 1
+  }
+
+  return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y)
+}
+
 function HistoryTimeline({ events }) {
   const layout = useMemo(() => buildLayout(events), [events])
   const legendEntries = Object.entries(categoryLabels)
   const [activeId, setActiveId] = useState(null)
-  const [timelineZoom, setTimelineZoom] = useState(1)
+  const [timelineZoom, setTimelineZoom] = useState(0.6)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const surfaceRef = useRef(null)
+  const canvasRef = useRef(null)
+  const pointersRef = useRef(new Map())
+  const gestureRef = useRef(null)
+  const panRef = useRef(pan)
+  const zoomRef = useRef(timelineZoom)
   const activeEvent = activeId ? layout.eventsById.get(activeId) ?? null : null
   const popupAlign =
     activeEvent == null
@@ -599,13 +632,175 @@ function HistoryTimeline({ events }) {
           top: `${(activeEvent.dotY / layout.height) * 100}%`,
         }
 
+  const clampPanToSurface = useCallback((nextPan, zoom = zoomRef.current) => {
+    const surface = surfaceRef.current
+    const canvas = canvasRef.current
+
+    if (!surface || !canvas) {
+      return nextPan
+    }
+
+    const surfaceRect = surface.getBoundingClientRect()
+    const minX = Math.min(0, surfaceRect.width - canvas.offsetWidth * zoom)
+    const minY = Math.min(0, surfaceRect.height - canvas.offsetHeight * zoom)
+
+    return {
+      x: clamp(nextPan.x, minX, 0),
+      y: clamp(nextPan.y, minY, 0),
+    }
+  }, [])
+
+  const commitPan = useCallback((nextPan, zoom = zoomRef.current) => {
+    const clampedPan = clampPanToSurface(nextPan, zoom)
+    panRef.current = clampedPan
+    setPan(clampedPan)
+  }, [clampPanToSurface])
+
+  const updateTimelineZoom = useCallback((nextZoom, anchorPoint) => {
+    const zoom = clamp(nextZoom, minTimelineZoom, maxTimelineZoom)
+    let nextPan = panRef.current
+
+    if (anchorPoint) {
+      const previousZoom = zoomRef.current
+      const contentPoint = {
+        x: (anchorPoint.x - panRef.current.x) / previousZoom,
+        y: (anchorPoint.y - panRef.current.y) / previousZoom,
+      }
+
+      nextPan = {
+        x: anchorPoint.x - contentPoint.x * zoom,
+        y: anchorPoint.y - contentPoint.y * zoom,
+      }
+    }
+
+    zoomRef.current = zoom
+    setTimelineZoom(zoom)
+    commitPan(nextPan, zoom)
+  }, [commitPan])
+
+  function getSurfacePoint(event) {
+    const rect = surfaceRef.current?.getBoundingClientRect()
+
+    if (!rect) {
+      return { x: 0, y: 0 }
+    }
+
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    }
+  }
+
+  function beginGesture() {
+    const points = [...pointersRef.current.values()]
+
+    if (points.length === 1) {
+      gestureRef.current = {
+        type: 'pan',
+        startPoint: points[0],
+        startPan: panRef.current,
+      }
+      return
+    }
+
+    if (points.length >= 2) {
+      const center = getPointerCenter(points)
+
+      gestureRef.current = {
+        type: 'pinch',
+        startDistance: getPointerDistance(points),
+        startZoom: zoomRef.current,
+        contentPoint: {
+          x: (center.x - panRef.current.x) / zoomRef.current,
+          y: (center.y - panRef.current.y) / zoomRef.current,
+        },
+      }
+      return
+    }
+
+    gestureRef.current = null
+  }
+
+  function handleTimelinePointerDown(event) {
+    if (event.pointerType === 'mouse' && event.button !== 0) {
+      return
+    }
+
+    const eventNode = event.target.closest?.('.timeline-event')
+
+    if (eventNode?.dataset?.eventId) {
+      setActiveId(eventNode.dataset.eventId)
+    }
+
+    event.preventDefault()
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    pointersRef.current.set(event.pointerId, getSurfacePoint(event))
+    beginGesture()
+  }
+
+  function handleTimelinePointerMove(event) {
+    if (!pointersRef.current.has(event.pointerId)) {
+      return
+    }
+
+    event.preventDefault()
+    pointersRef.current.set(event.pointerId, getSurfacePoint(event))
+
+    const points = [...pointersRef.current.values()]
+    const gesture = gestureRef.current
+
+    if (!gesture) {
+      return
+    }
+
+    if (gesture.type === 'pan' && points.length === 1) {
+      const point = points[0]
+      commitPan({
+        x: gesture.startPan.x + point.x - gesture.startPoint.x,
+        y: gesture.startPan.y + point.y - gesture.startPoint.y,
+      })
+      return
+    }
+
+    if (gesture.type === 'pinch' && points.length >= 2) {
+      const center = getPointerCenter(points)
+      const nextZoom =
+        gesture.startZoom * (getPointerDistance(points) / gesture.startDistance)
+      const zoom = clamp(nextZoom, minTimelineZoom, maxTimelineZoom)
+
+      zoomRef.current = zoom
+      setTimelineZoom(zoom)
+      commitPan({
+        x: center.x - gesture.contentPoint.x * zoom,
+        y: center.y - gesture.contentPoint.y * zoom,
+      }, zoom)
+    }
+  }
+
+  function handleTimelinePointerEnd(event) {
+    pointersRef.current.delete(event.pointerId)
+    beginGesture()
+  }
+
+  function handleTimelineWheel(event) {
+    if (!event.ctrlKey) {
+      return
+    }
+
+    event.preventDefault()
+    updateTimelineZoom(
+      zoomRef.current + (event.deltaY < 0 ? 0.08 : -0.08),
+      getSurfacePoint(event),
+    )
+  }
+
   return (
     <div className="timeline-rail">
-      <div className="timeline-poster">
-        <div className="timeline-poster-head">
-          <p>Timeline guide</p>
-          <span>Hover cards for details.</span>
-        </div>
+        <div className="timeline-poster">
+          <div className="timeline-poster-head">
+            <p>Timeline guide</p>
+            <span>Tap or hover for details.</span>
+          </div>
 
         <div className="timeline-legend" aria-label="Timeline color legend">
           <div className="timeline-legend-row">
@@ -640,33 +835,47 @@ function HistoryTimeline({ events }) {
           </div>
         </div>
 
-        <div className="timeline-mobile-controls" aria-label="Timeline zoom controls">
-          <button
-            type="button"
-            aria-label="Zoom timeline out"
-            disabled={timelineZoom <= 0.85}
-            onClick={() => setTimelineZoom((currentZoom) => Math.max(0.85, currentZoom - 0.15))}
-          >
-            −
-          </button>
-          <span aria-hidden="true">{Math.round(timelineZoom * 100)}%</span>
-          <button
-            type="button"
-            aria-label="Zoom timeline in"
-            disabled={timelineZoom >= 1.45}
-            onClick={() => setTimelineZoom((currentZoom) => Math.min(1.45, currentZoom + 0.15))}
-          >
-            +
-          </button>
-        </div>
-
         <div
+          ref={surfaceRef}
           className="timeline-surface"
           onMouseLeave={() => setActiveId(null)}
+          onPointerDown={handleTimelinePointerDown}
+          onPointerMove={handleTimelinePointerMove}
+          onPointerUp={handleTimelinePointerEnd}
+          onPointerCancel={handleTimelinePointerEnd}
+          onWheel={handleTimelineWheel}
         >
           <div
+            className="timeline-mobile-controls"
+            aria-label="Timeline zoom controls"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="Zoom timeline out"
+              disabled={timelineZoom <= minTimelineZoom}
+              onClick={() => updateTimelineZoom(timelineZoom - 0.15)}
+            >
+              −
+            </button>
+            <span aria-hidden="true">{Math.round(timelineZoom * 100)}%</span>
+            <button
+              type="button"
+              aria-label="Zoom timeline in"
+              disabled={timelineZoom >= maxTimelineZoom}
+              onClick={() => updateTimelineZoom(timelineZoom + 0.15)}
+            >
+              +
+            </button>
+          </div>
+          <div
+            ref={canvasRef}
             className="timeline-scroll-canvas"
-            style={{ '--timeline-mobile-zoom': timelineZoom }}
+            style={{
+              '--timeline-mobile-zoom': timelineZoom,
+              '--timeline-pan-x': `${pan.x}px`,
+              '--timeline-pan-y': `${pan.y}px`,
+            }}
           >
             <svg
               className="timeline-svg"
@@ -826,6 +1035,7 @@ function HistoryTimeline({ events }) {
                   <g
                     key={event.id}
                     className={`timeline-event${isActive ? ' is-active' : ''}`}
+                    data-event-id={event.id}
                     role="button"
                     tabIndex="0"
                     aria-label={`${event.date}: ${event.title}`}
@@ -909,25 +1119,26 @@ function HistoryTimeline({ events }) {
               })}
             </svg>
 
-            {activeEvent ? (
-              <article
-                className={`timeline-popup side-${activeEvent.popupSide} align-${popupAlign}`}
-                style={popupStyle}
-                aria-live="polite"
-              >
-                <span
-                  className="timeline-popup-chip"
-                  style={{ backgroundColor: categoryColors[activeEvent.category] }}
-                />
-                <p className="timeline-popup-type">
-                  {categoryLabels[activeEvent.category]}
-                </p>
-                <p className="timeline-popup-date">{activeEvent.date}</p>
-                <h3>{activeEvent.title}</h3>
-                <p className="timeline-popup-copy">{activeEvent.body}</p>
-              </article>
-            ) : null}
           </div>
+
+          {activeEvent ? (
+            <article
+              className={`timeline-popup side-${activeEvent.popupSide} align-${popupAlign}`}
+              style={popupStyle}
+              aria-live="polite"
+            >
+              <span
+                className="timeline-popup-chip"
+                style={{ backgroundColor: categoryColors[activeEvent.category] }}
+              />
+              <p className="timeline-popup-type">
+                {categoryLabels[activeEvent.category]}
+              </p>
+              <p className="timeline-popup-date">{activeEvent.date}</p>
+              <h3>{activeEvent.title}</h3>
+              <p className="timeline-popup-copy">{activeEvent.body}</p>
+            </article>
+          ) : null}
         </div>
       </div>
     </div>

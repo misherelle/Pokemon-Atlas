@@ -1,5 +1,15 @@
 import { getCardPool, getPokeWalletErrorDetails, getStatus } from './_pokewallet.js'
 
+function getCacheSecondsUntil(nextRefreshAt) {
+  const refreshTime = Date.parse(nextRefreshAt)
+
+  if (!Number.isFinite(refreshTime)) {
+    return 60
+  }
+
+  return Math.max(0, Math.floor((refreshTime - Date.now()) / 1000))
+}
+
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
     response.setHeader('Allow', 'GET')
@@ -7,10 +17,15 @@ export default async function handler(request, response) {
     return
   }
 
-  response.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=120')
-
   try {
-    response.status(200).json(await getCardPool())
+    const pool = await getCardPool()
+    const cacheSeconds = getCacheSecondsUntil(pool.nextRefreshAt)
+
+    response.setHeader(
+      'Cache-Control',
+      `s-maxage=${cacheSeconds}, stale-while-revalidate=20`,
+    )
+    response.status(200).json(pool)
   } catch (error) {
     console.error('pokewallet pool error:', error)
     console.error('pokewallet pool message:', error?.message)
