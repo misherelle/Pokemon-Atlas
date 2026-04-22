@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import BackToTopButton from './BackToTopButton.jsx'
 
 const navigation = [
@@ -22,6 +23,7 @@ const rightSideNavigation = [
 ]
 
 function SiteLayout({ children, route }) {
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const currentIndex = navigation.findIndex((item) => item.href.replace('#', '') === route)
   const hasValidIndex = currentIndex >= 0
   const previousPage = hasValidIndex
@@ -116,6 +118,55 @@ function SiteLayout({ children, route }) {
               </a>
             ))}
           </nav>
+
+          <button
+            type="button"
+            className="mobile-menu-button"
+            aria-label={isMobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMobileNavOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setIsMobileNavOpen((isOpen) => !isOpen)}
+          >
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </button>
+
+          {isMobileNavOpen ? (
+            <nav
+              id="mobile-navigation"
+              className="mobile-menu is-open"
+              aria-label="Mobile navigation"
+            >
+              <div className="mobile-menu-arrows">
+                {previousPage ? (
+                  <a href={previousPage.href} onClick={() => setIsMobileNavOpen(false)}>
+                    <strong>&larr; Prev</strong>
+                    <span>{previousPage.label}</span>
+                  </a>
+                ) : null}
+                {nextPage ? (
+                  <a href={nextPage.href} onClick={() => setIsMobileNavOpen(false)}>
+                    <strong>Next &rarr;</strong>
+                    <span>{nextPage.label}</span>
+                  </a>
+                ) : null}
+              </div>
+
+              <div className="mobile-menu-links">
+                {navigation.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className={route === item.href.replace('#', '') ? 'is-active' : ''}
+                    onClick={() => setIsMobileNavOpen(false)}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </nav>
+          ) : null}
         </header>
 
         <main>{children}</main>

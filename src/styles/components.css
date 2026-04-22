@@ -228,6 +228,11 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 247, 255, 0.94));
 }
 
+.timeline-scroll-canvas {
+  position: relative;
+  width: 100%;
+}
+
 .timeline-svg {
   width: 100%;
   min-width: 0;
@@ -827,6 +832,14 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 244, 255, 0.92));
 }
 
+.case-study-main .visual-slot.has-image {
+  align-self: start;
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 0.72;
+  padding: 10px;
+}
+
 .visual-slot-image {
   width: 100%;
   height: 100%;
@@ -871,9 +884,9 @@
 }
 
 .price-game-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(360px, 0.75fr) minmax(0, 1.25fr);
   align-items: end;
-  justify-content: space-between;
   gap: 18px;
   margin-bottom: 16px;
 }
@@ -885,10 +898,10 @@
 .price-game-score {
   display: flex;
   align-items: stretch;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 8px;
-  max-width: 620px;
+  width: 100%;
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -1132,22 +1145,25 @@
 
 .case-study-template {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.82fr);
-  gap: 16px;
-  padding: 18px;
+  grid-template-columns:
+    minmax(190px, 0.46fr)
+    minmax(280px, 0.68fr)
+    minmax(430px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+  padding: 20px;
   border-radius: 28px;
 }
 
 .case-study-main {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 14px;
+  display: contents;
 }
 
 .case-study-info {
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 14px;
+  min-width: 0;
 }
 
 .case-study-subtitle {
@@ -1168,12 +1184,13 @@
 
 .case-study-side {
   display: grid;
-  gap: 16px;
+  gap: 14px;
+  min-width: 0;
 }
 
 .price-history-slot,
 .market-snapshot {
-  padding: 18px;
+  padding: 16px;
   border-radius: 22px;
   border: 1px solid var(--border);
   background: white;
@@ -1207,7 +1224,7 @@
   display: grid;
   gap: 8px;
   min-height: 0;
-  padding: 6px 6px 10px;
+  padding: 4px 6px 10px;
   border-radius: 18px;
   overflow: hidden;
   background:
@@ -1216,7 +1233,7 @@
 
 .price-history-chart svg {
   width: 100%;
-  min-height: 190px;
+  height: clamp(180px, 15vw, 218px);
 }
 
 .price-history-grid-line {
@@ -1290,7 +1307,7 @@
 }
 
 .snapshot-cell {
-  padding: 14px 12px;
+  padding: 12px;
   border-radius: 16px;
   background: var(--panel-soft);
 }
@@ -1351,6 +1368,15 @@
   .top-ten-card {
     grid-template-columns: 1fr;
   }
+
+  .case-study-main {
+    display: grid;
+  }
+
+  .case-study-main .visual-slot.has-image {
+    aspect-ratio: auto;
+    min-height: 260px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1362,6 +1388,13 @@
 }
 
 @media (max-width: 720px) {
+  .page-stack,
+  .timeline-rail,
+  .timeline-poster,
+  .timeline-surface {
+    min-width: 0;
+  }
+
   .toggle-row {
     width: 100%;
     flex-wrap: wrap;
@@ -1397,10 +1430,14 @@
   .price-game-head,
   .price-game-actions {
     align-items: stretch;
+  }
+
+  .price-game-actions {
     flex-direction: column;
   }
 
   .price-game-head {
+    grid-template-columns: 1fr;
     gap: 12px;
   }
 
@@ -1473,8 +1510,10 @@
   }
 
   .timeline-poster {
+    max-width: 100%;
     padding: 14px;
     border-radius: 24px;
+    overflow: hidden;
   }
 
   .timeline-poster-head {
@@ -1530,8 +1569,11 @@
 
   .timeline-surface {
     overflow: auto;
-    max-height: 68vh;
+    width: 100%;
+    max-width: 100%;
+    max-height: min(68vh, 620px);
     border-radius: 20px;
+    contain: layout paint;
     overscroll-behavior: contain;
     touch-action: pan-x pan-y pinch-zoom;
     -webkit-overflow-scrolling: touch;
@@ -1554,6 +1596,11 @@
   }
 
   .timeline-svg {
+    width: 100%;
+    max-width: none;
+  }
+
+  .timeline-scroll-canvas {
     width: calc(1180px * var(--timeline-mobile-zoom, 1));
     max-width: none;
   }
@@ -1571,18 +1618,13 @@
   }
 
   .timeline-popup {
-    position: fixed;
-    left: 50% !important;
-    top: auto !important;
-    right: auto;
-    bottom: 20px;
     width: min(220px, calc(100% - 34px));
     padding: 14px 16px;
-    transform: translateX(-50%) !important;
   }
 
   .timeline-popup::after {
-    display: none;
+    width: 14px;
+    height: 14px;
   }
 
   .back-to-top {

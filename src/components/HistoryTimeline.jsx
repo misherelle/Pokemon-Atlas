@@ -664,266 +664,270 @@ function HistoryTimeline({ events }) {
           className="timeline-surface"
           onMouseLeave={() => setActiveId(null)}
         >
-          <svg
-            className="timeline-svg"
+          <div
+            className="timeline-scroll-canvas"
             style={{ '--timeline-mobile-zoom': timelineZoom }}
-            viewBox={`0 0 ${layout.width} ${layout.height}`}
-            role="img"
-            aria-label="Scaled Pokémon TCG history timeline with labeled events"
           >
-            <defs>
-              <linearGradient
-                id="timelineStrokeGradient"
-                gradientUnits="userSpaceOnUse"
-                x1={layout.leftPad}
-                y1="0%"
-                x2={layout.rightPad}
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#7a6af8" />
-                <stop offset="48%" stopColor="#ff7e9b" />
-                <stop offset="100%" stopColor="#58c6ef" />
-              </linearGradient>
-            </defs>
-
-            {layout.rows.map((row, index) => (
-              <g key={`line-${index}`}>
-                <line
+            <svg
+              className="timeline-svg"
+              viewBox={`0 0 ${layout.width} ${layout.height}`}
+              role="img"
+              aria-label="Scaled Pokémon TCG history timeline with labeled events"
+            >
+              <defs>
+                <linearGradient
+                  id="timelineStrokeGradient"
+                  gradientUnits="userSpaceOnUse"
                   x1={layout.leftPad}
-                  y1={row.lineY}
+                  y1="0%"
                   x2={layout.rightPad}
-                  y2={row.lineY}
-                  className="timeline-path-underlay"
-                />
-                <line
-                  x1={layout.leftPad}
-                  y1={row.lineY}
-                  x2={layout.rightPad}
-                  y2={row.lineY}
-                  className="timeline-path-line"
-                  stroke="url(#timelineStrokeGradient)"
-                />
-                {index < layout.rows.length - 1 ? (
-                  <>
-                    <path
-                      d={connectorPath(
-                        row,
-                        layout.rows[index + 1],
-                        layout.leftPad,
-                        layout.rightPad,
-                      )}
-                      className="timeline-path-underlay"
-                      fill="none"
-                    />
-                    <path
-                      d={connectorPath(
-                        row,
-                        layout.rows[index + 1],
-                        layout.leftPad,
-                        layout.rightPad,
-                      )}
-                      className="timeline-path-line"
-                      fill="none"
-                      stroke="url(#timelineStrokeGradient)"
-                    />
-                  </>
-                ) : null}
-              </g>
-            ))}
-
-            {layout.yearMarkers.map((marker) => (
-              <g key={`year-${marker.key}`} className="timeline-year-marker">
-                <line
-                  x1={marker.tickX}
-                  y1={marker.lineY - 9}
-                  x2={marker.tickX}
-                  y2={marker.lineY + 9}
-                  className="timeline-year-tick"
-                />
-                <text
-                  x={marker.x}
-                  y={marker.labelY}
-                  textAnchor={marker.textAnchor}
-                  className="timeline-row-year"
+                  y2="0%"
                 >
-                  {marker.year}
-                </text>
-              </g>
-            ))}
+                  <stop offset="0%" stopColor="#7a6af8" />
+                  <stop offset="48%" stopColor="#ff7e9b" />
+                  <stop offset="100%" stopColor="#58c6ef" />
+                </linearGradient>
+              </defs>
 
-            {layout.gapMarkers.map((marker) => (
-              <g key={`gap-${marker.label}-${marker.x}`} className="timeline-gap-marker">
-                <line
-                  x1={marker.x - (marker.slashCount * 18 + 24) / 2}
-                  y1={marker.lineY}
-                  x2={marker.x + (marker.slashCount * 18 + 24) / 2}
-                  y2={marker.lineY}
-                  className="timeline-gap-dash"
-                />
-                {Array.from({ length: marker.slashCount }, (_, index) => {
-                  const slashCenterX =
-                    marker.x - ((marker.slashCount - 1) * 18) / 2 + index * 18
+              {layout.rows.map((row, index) => (
+                <g key={`line-${index}`}>
+                  <line
+                    x1={layout.leftPad}
+                    y1={row.lineY}
+                    x2={layout.rightPad}
+                    y2={row.lineY}
+                    className="timeline-path-underlay"
+                  />
+                  <line
+                    x1={layout.leftPad}
+                    y1={row.lineY}
+                    x2={layout.rightPad}
+                    y2={row.lineY}
+                    className="timeline-path-line"
+                    stroke="url(#timelineStrokeGradient)"
+                  />
+                  {index < layout.rows.length - 1 ? (
+                    <>
+                      <path
+                        d={connectorPath(
+                          row,
+                          layout.rows[index + 1],
+                          layout.leftPad,
+                          layout.rightPad,
+                        )}
+                        className="timeline-path-underlay"
+                        fill="none"
+                      />
+                      <path
+                        d={connectorPath(
+                          row,
+                          layout.rows[index + 1],
+                          layout.leftPad,
+                          layout.rightPad,
+                        )}
+                        className="timeline-path-line"
+                        fill="none"
+                        stroke="url(#timelineStrokeGradient)"
+                      />
+                    </>
+                  ) : null}
+                </g>
+              ))}
+
+              {layout.yearMarkers.map((marker) => (
+                <g key={`year-${marker.key}`} className="timeline-year-marker">
+                  <line
+                    x1={marker.tickX}
+                    y1={marker.lineY - 9}
+                    x2={marker.tickX}
+                    y2={marker.lineY + 9}
+                    className="timeline-year-tick"
+                  />
+                  <text
+                    x={marker.x}
+                    y={marker.labelY}
+                    textAnchor={marker.textAnchor}
+                    className="timeline-row-year"
+                  >
+                    {marker.year}
+                  </text>
+                </g>
+              ))}
+
+              {layout.gapMarkers.map((marker) => (
+                <g key={`gap-${marker.label}-${marker.x}`} className="timeline-gap-marker">
+                  <line
+                    x1={marker.x - (marker.slashCount * 18 + 24) / 2}
+                    y1={marker.lineY}
+                    x2={marker.x + (marker.slashCount * 18 + 24) / 2}
+                    y2={marker.lineY}
+                    className="timeline-gap-dash"
+                  />
+                  {Array.from({ length: marker.slashCount }, (_, index) => {
+                    const slashCenterX =
+                      marker.x - ((marker.slashCount - 1) * 18) / 2 + index * 18
+
+                    return (
+                      <line
+                        key={`${marker.label}-slash-${index}`}
+                        x1={slashCenterX - 6}
+                        y1={marker.lineY + 18}
+                        x2={slashCenterX + 6}
+                        y2={marker.lineY - 18}
+                        className="timeline-gap-slash"
+                      />
+                    )
+                  })}
+                  <rect
+                    x={marker.x - 66}
+                    y={marker.labelY - 20}
+                    width="132"
+                    height="30"
+                    rx="15"
+                    className="timeline-gap-pill"
+                  />
+                  <text
+                    x={marker.x}
+                    y={marker.labelY}
+                    textAnchor="middle"
+                    className="timeline-gap-text"
+                  >
+                    {marker.label}
+                  </text>
+                </g>
+              ))}
+
+              <g className="timeline-stem-layer" aria-hidden="true">
+                {layout.orderedEvents.map((event) => {
+                  const stemY2 =
+                    event.labelSide === 'below'
+                      ? event.cardY
+                      : event.cardY + 76
 
                   return (
-                    <line
-                      key={`${marker.label}-slash-${index}`}
-                      x1={slashCenterX - 6}
-                      y1={marker.lineY + 18}
-                      x2={slashCenterX + 6}
-                      y2={marker.lineY - 18}
-                      className="timeline-gap-slash"
+                    <path
+                      key={`stem-${event.id}`}
+                      d={stemPath(event, stemY2)}
+                      className="timeline-stem"
+                      fill="none"
                     />
                   )
                 })}
-                <rect
-                  x={marker.x - 66}
-                  y={marker.labelY - 20}
-                  width="132"
-                  height="30"
-                  rx="15"
-                  className="timeline-gap-pill"
-                />
-                <text
-                  x={marker.x}
-                  y={marker.labelY}
-                  textAnchor="middle"
-                  className="timeline-gap-text"
-                >
-                  {marker.label}
-                </text>
               </g>
-            ))}
 
-            <g className="timeline-stem-layer" aria-hidden="true">
               {layout.orderedEvents.map((event) => {
-                const stemY2 =
-                  event.labelSide === 'below'
-                    ? event.cardY
-                    : event.cardY + 76
+                const isActive = activeEvent?.id === event.id
+                const anchorX = getEventAnchorX(event)
+                const textX = event.cardCenterX
+                const dateY = event.cardY + 22
+                const firstLineY = event.cardY + 44
 
                 return (
-                  <path
-                    key={`stem-${event.id}`}
-                    d={stemPath(event, stemY2)}
-                    className="timeline-stem"
-                    fill="none"
-                  />
-                )
-              })}
-            </g>
-
-            {layout.orderedEvents.map((event) => {
-              const isActive = activeEvent?.id === event.id
-              const anchorX = getEventAnchorX(event)
-              const textX = event.cardCenterX
-              const dateY = event.cardY + 22
-              const firstLineY = event.cardY + 44
-
-              return (
-                <g
-                  key={event.id}
-                  className={`timeline-event${isActive ? ' is-active' : ''}`}
-                  role="button"
-                  tabIndex="0"
-                  aria-label={`${event.date}: ${event.title}`}
-                  onMouseEnter={() => setActiveId(event.id)}
-                  onFocus={() => setActiveId(event.id)}
-                  onClick={() => setActiveId(event.id)}
-                  onKeyDown={(entryEvent) => {
-                    if (
-                      entryEvent.key === 'Enter' ||
-                      entryEvent.key === ' '
-                    ) {
-                      entryEvent.preventDefault()
-                      setActiveId(event.id)
-                    }
-                  }}
-                >
-                  <line
-                    x1={anchorX}
-                    y1={event.lineY}
-                    x2={anchorX}
-                    y2={event.dotY}
-                    className="timeline-dot-pin"
-                  />
-                  <circle
-                    cx={anchorX}
-                    cy={event.dotY}
-                    r="22"
-                    className="timeline-hit-area"
-                  />
-                  {isActive ? (
+                  <g
+                    key={event.id}
+                    className={`timeline-event${isActive ? ' is-active' : ''}`}
+                    role="button"
+                    tabIndex="0"
+                    aria-label={`${event.date}: ${event.title}`}
+                    onMouseEnter={() => setActiveId(event.id)}
+                    onFocus={() => setActiveId(event.id)}
+                    onClick={() => setActiveId(event.id)}
+                    onKeyDown={(entryEvent) => {
+                      if (
+                        entryEvent.key === 'Enter' ||
+                        entryEvent.key === ' '
+                      ) {
+                        entryEvent.preventDefault()
+                        setActiveId(event.id)
+                      }
+                    }}
+                  >
+                    <line
+                      x1={anchorX}
+                      y1={event.lineY}
+                      x2={anchorX}
+                      y2={event.dotY}
+                      className="timeline-dot-pin"
+                    />
                     <circle
                       cx={anchorX}
                       cy={event.dotY}
-                      r="18"
-                      className="timeline-dot-halo"
+                      r="22"
+                      className="timeline-hit-area"
                     />
-                  ) : null}
-                  <circle
-                    cx={anchorX}
-                    cy={event.dotY}
-                    r="12"
-                    className="timeline-dot-ring"
-                  />
-                  <circle
-                    cx={anchorX}
-                    cy={event.dotY}
-                    r={isActive ? '8.5' : '7.5'}
-                    className="timeline-node-core"
-                    fill={categoryColors[event.category]}
-                  />
+                    {isActive ? (
+                      <circle
+                        cx={anchorX}
+                        cy={event.dotY}
+                        r="18"
+                        className="timeline-dot-halo"
+                      />
+                    ) : null}
+                    <circle
+                      cx={anchorX}
+                      cy={event.dotY}
+                      r="12"
+                      className="timeline-dot-ring"
+                    />
+                    <circle
+                      cx={anchorX}
+                      cy={event.dotY}
+                      r={isActive ? '8.5' : '7.5'}
+                      className="timeline-node-core"
+                      fill={categoryColors[event.category]}
+                    />
 
-                  <rect
-                    x={event.cardX}
-                    y={event.cardY}
-                    width={event.cardWidth}
-                    height="76"
-                    rx="22"
-                    className={isActive ? 'timeline-card-box active' : 'timeline-card-box'}
-                  />
-                  <text
-                    x={textX}
-                    y={dateY}
-                    textAnchor="middle"
-                    className="timeline-card-date"
-                  >
-                    {event.date}
-                  </text>
-                  {event.titleLines.map((line, lineIndex) => (
+                    <rect
+                      x={event.cardX}
+                      y={event.cardY}
+                      width={event.cardWidth}
+                      height="76"
+                      rx="22"
+                      className={isActive ? 'timeline-card-box active' : 'timeline-card-box'}
+                    />
                     <text
-                      key={`${event.id}-${lineIndex}`}
                       x={textX}
-                      y={firstLineY + lineIndex * 20}
+                      y={dateY}
                       textAnchor="middle"
-                      className="timeline-card-title"
+                      className="timeline-card-date"
                     >
-                      {line}
+                      {event.date}
                     </text>
-                  ))}
-                </g>
-              )
-            })}
-          </svg>
+                    {event.titleLines.map((line, lineIndex) => (
+                      <text
+                        key={`${event.id}-${lineIndex}`}
+                        x={textX}
+                        y={firstLineY + lineIndex * 20}
+                        textAnchor="middle"
+                        className="timeline-card-title"
+                      >
+                        {line}
+                      </text>
+                    ))}
+                  </g>
+                )
+              })}
+            </svg>
 
-          {activeEvent ? (
-            <article
-              className={`timeline-popup side-${activeEvent.popupSide} align-${popupAlign}`}
-              style={popupStyle}
-              aria-live="polite"
-            >
-              <span
-                className="timeline-popup-chip"
-                style={{ backgroundColor: categoryColors[activeEvent.category] }}
-              />
-              <p className="timeline-popup-type">
-                {categoryLabels[activeEvent.category]}
-              </p>
-              <p className="timeline-popup-date">{activeEvent.date}</p>
-              <h3>{activeEvent.title}</h3>
-              <p className="timeline-popup-copy">{activeEvent.body}</p>
-            </article>
-          ) : null}
+            {activeEvent ? (
+              <article
+                className={`timeline-popup side-${activeEvent.popupSide} align-${popupAlign}`}
+                style={popupStyle}
+                aria-live="polite"
+              >
+                <span
+                  className="timeline-popup-chip"
+                  style={{ backgroundColor: categoryColors[activeEvent.category] }}
+                />
+                <p className="timeline-popup-type">
+                  {categoryLabels[activeEvent.category]}
+                </p>
+                <p className="timeline-popup-date">{activeEvent.date}</p>
+                <h3>{activeEvent.title}</h3>
+                <p className="timeline-popup-copy">{activeEvent.body}</p>
+              </article>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

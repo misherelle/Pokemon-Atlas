@@ -7,12 +7,12 @@ import {
 } from '../data/siteData.js'
 
 const chartWidth = 520
-const chartHeight = 220
+const chartHeight = 190
 const chartPadding = {
-  top: 22,
-  right: 24,
-  bottom: 42,
-  left: 58,
+  top: 16,
+  right: 20,
+  bottom: 36,
+  left: 52,
 }
 
 function formatSalePrice(value) {
