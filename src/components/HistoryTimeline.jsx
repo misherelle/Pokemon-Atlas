@@ -584,6 +584,7 @@ function HistoryTimeline({ events }) {
   const layout = useMemo(() => buildLayout(events), [events])
   const legendEntries = Object.entries(categoryLabels)
   const [activeId, setActiveId] = useState(null)
+  const [timelineZoom, setTimelineZoom] = useState(1)
   const activeEvent = activeId ? layout.eventsById.get(activeId) ?? null : null
   const popupAlign =
     activeEvent == null
@@ -639,12 +640,33 @@ function HistoryTimeline({ events }) {
           </div>
         </div>
 
+        <div className="timeline-mobile-controls" aria-label="Timeline zoom controls">
+          <button
+            type="button"
+            aria-label="Zoom timeline out"
+            disabled={timelineZoom <= 0.85}
+            onClick={() => setTimelineZoom((currentZoom) => Math.max(0.85, currentZoom - 0.15))}
+          >
+            −
+          </button>
+          <span aria-hidden="true">{Math.round(timelineZoom * 100)}%</span>
+          <button
+            type="button"
+            aria-label="Zoom timeline in"
+            disabled={timelineZoom >= 1.45}
+            onClick={() => setTimelineZoom((currentZoom) => Math.min(1.45, currentZoom + 0.15))}
+          >
+            +
+          </button>
+        </div>
+
         <div
           className="timeline-surface"
           onMouseLeave={() => setActiveId(null)}
         >
           <svg
             className="timeline-svg"
+            style={{ '--timeline-mobile-zoom': timelineZoom }}
             viewBox={`0 0 ${layout.width} ${layout.height}`}
             role="img"
             aria-label="Scaled Pokémon TCG history timeline with labeled events"

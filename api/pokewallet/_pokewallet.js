@@ -14,7 +14,7 @@ const DEFAULT_ENGLISH_ONLY = true
 const DEFAULT_REQUIRE_IMAGES = true
 const DEFAULT_IMAGE_CHECKS_PER_REFRESH = 5
 const IMAGE_CHECK_BATCH_SIZE = 3
-const FILTER_VERSION = 2
+const FILTER_VERSION = 4
 
 const prioritySearchQueries = [
   'charizard ex',
@@ -81,7 +81,8 @@ const nonEnglishSetPatterns = [
   /[\u3040-\u30ff\u3400-\u9fff]/,
   /\b(?:japanese|japan|korean|chinese|thai|indonesian|german|french|italian|spanish|portuguese)\b/i,
   /\b(?:SM|SV|S|XY|BW|DP|M|CP)\d+[A-Z]?\s*[:_]/i,
-  /\b(?:pokemon card 151|expansion pack|gx ultra shiny|ultra shiny|shiny treasure|shiny star v|vstar universe|terastal festival|eevee heroes|tag bolt|tag team gx all stars|dream league|lost abyss|clay burst|snow hazard|raging surf|ancient roar|future flash|wild force|cyber judge|battle partners|night unison|ninja spinner|remix bout|miracle twin|full metal wall|sky legend|double blaze|dark phantasma|paradigm trigger|star birth|incandescent arcana|battle region|space juggler|time gazer|dark order|gift box|quarter deck|half deck)\b/i,
+  /\bS\d+[A-Z]?-P\s*[:_]/i,
+  /\b(?:pokemon card 151|expansion pack|gx ultra shiny|ultra shiny|shiny treasure|shiny star v|vstar universe|terastal festival|eevee heroes|tag bolt|tag team gx all stars|dream league|lost abyss|clay burst|snow hazard|raging surf|ancient roar|future flash|wild force|cyber judge|battle partners|night unison|ninja spinner|remix bout|miracle twin|full metal wall|sky legend|double blaze|dark phantasma|paradigm trigger|star birth|incandescent arcana|battle region|space juggler|time gazer|dark order|rocket gang strikes back|gift box|quarter deck|half deck|split earth|the best of xy|special deck set|promo card pack|pokemon-e starter deck)\b/i,
   /\b(?:S-P|XY-P|SM-P|SV-P|BW-P|DP-P|PCG-P|ADV-P|L-P)\b/i,
   /\bpromotional cards\b/i,
 ]
@@ -294,6 +295,10 @@ function getPoolCacheKey(config) {
     FILTER_VERSION,
     hashText(config.searchQueries.join('|')),
   ].join(':')
+}
+
+function getNextRefreshAt(now, cacheMs) {
+  return Math.floor(now / cacheMs) * cacheMs + cacheMs
 }
 
 function normalizeCard(card, config) {
@@ -539,6 +544,7 @@ async function preferCardsWithImages(cards, config) {
 
   const confirmed = []
   const unchecked = []
+  const missing = []
   let checkedCount = 0
 
   for (let index = 0; index < cards.length; index += IMAGE_CHECK_BATCH_SIZE) {
@@ -565,6 +571,8 @@ async function preferCardsWithImages(cards, config) {
     for (const checkedCard of checkedCards) {
       if (checkedCard.hasImage) {
         confirmed.push(checkedCard.card)
+      } else {
+        missing.push(checkedCard.card)
       }
     }
 
@@ -575,10 +583,10 @@ async function preferCardsWithImages(cards, config) {
   }
 
   if (confirmed.length < 2) {
-    return cards
+    return cards.slice(0, config.poolSize)
   }
 
-  return [...confirmed, ...unchecked].slice(0, config.poolSize)
+  return [...confirmed, ...unchecked, ...missing].slice(0, config.poolSize)
 }
 
 async function fetchPool(config) {
@@ -589,20 +597,45 @@ async function fetchPool(config) {
   const seen = new Set()
   const candidates = []
   const cardsPerQuery = config.maxCardsPerQuery
+  const targetCandidateCount = config.poolSize * 2
+
+  const addCandidate = (card) => {
+    if (seen.has(card.productId)) {
+      return false
+    }
+
+    seen.add(card.productId)
+    candidates.push(card)
+    return true
+  }
 
   for (const result of queryResults) {
     let cardsFromQuery = 0
 
     for (const card of result.cards) {
-      if (seen.has(card.productId)) {
+      if (!addCandidate(card)) {
         continue
       }
 
-      seen.add(card.productId)
-      candidates.push(card)
       cardsFromQuery += 1
 
-      if (cardsFromQuery >= cardsPerQuery || candidates.length >= config.poolSize * 2) {
+      if (cardsFromQuery >= cardsPerQuery || candidates.length >= targetCandidateCount) {
+        break
+      }
+    }
+  }
+
+  if (candidates.length < targetCandidateCount) {
+    for (const result of queryResults) {
+      for (const card of result.cards) {
+        addCandidate(card)
+
+        if (candidates.length >= targetCandidateCount) {
+          break
+        }
+      }
+
+      if (candidates.length >= targetCandidateCount) {
         break
       }
     }
@@ -636,7 +669,7 @@ export async function getCardPool(env = processEnv) {
 
   const { cards, queries } = await fetchPool(config)
   const refreshedAt = new Date(now).toISOString()
-  const expiresAt = now + config.cacheMs
+  const expiresAt = getNextRefreshAt(now, config.cacheMs)
   const payload = {
     source: 'pokewallet',
     cards,

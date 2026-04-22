@@ -216,6 +216,10 @@
   left: 8px;
 }
 
+.timeline-mobile-controls {
+  display: none;
+}
+
 .timeline-surface {
   position: relative;
   overflow: hidden;
@@ -879,30 +883,49 @@
 }
 
 .price-game-score {
-  display: grid;
-  gap: 6px;
-  min-width: 210px;
-  padding: 14px 16px;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 620px;
+  padding: 10px;
   border: 1px solid var(--border);
   border-radius: 20px;
   background: var(--panel-soft);
 }
 
-.price-game-score span {
-  color: var(--text-soft);
-  font-size: 0.82rem;
+.price-score-stat {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  min-width: 72px;
+  padding: 7px 9px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
-.price-game-score strong {
+.price-score-stat.is-wide {
+  min-width: 150px;
+}
+
+.price-score-stat span {
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.price-score-stat strong {
   color: var(--heading);
   font-family: var(--display);
-  font-size: 1.35rem;
+  font-size: 0.98rem;
+  line-height: 1.05;
 }
 
 .price-score-reset {
-  justify-self: start;
-  margin-top: 2px;
-  padding: 6px 10px;
+  align-self: center;
+  min-height: 40px;
+  padding: 0 12px;
   border: 1px solid rgba(127, 109, 242, 0.16);
   border-radius: 999px;
   background: white;
@@ -1358,6 +1381,19 @@
     grid-template-columns: 1fr;
   }
 
+  .info-card,
+  .guide-card,
+  .comparison-card,
+  .deck-card,
+  .record-pill,
+  .rarity-card,
+  .grade-card,
+  .chart-card,
+  .case-study-template {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
   .price-game-head,
   .price-game-actions {
     align-items: stretch;
@@ -1369,14 +1405,30 @@
   }
 
   .price-game-head h2 {
-    max-width: 12ch;
+    max-width: 14ch;
   }
 
   .price-game-score {
+    justify-content: stretch;
     min-width: 0;
   }
 
+  .price-score-stat {
+    flex: 1 1 84px;
+    min-width: 0;
+  }
+
+  .price-score-stat.is-wide {
+    flex-basis: 150px;
+    min-width: 0;
+  }
+
+  .price-score-reset {
+    width: 100%;
+  }
+
   .price-card {
+    grid-template-columns: minmax(92px, 35%) minmax(0, 1fr);
     gap: 14px;
     min-height: auto;
     padding: 14px;
@@ -1384,15 +1436,40 @@
   }
 
   .price-card-image-wrap {
-    min-height: 260px;
+    min-height: 150px;
   }
 
   .price-card-image {
-    max-height: 250px;
+    max-height: 150px;
+  }
+
+  .price-card-set {
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
   }
 
   .price-card-copy strong {
-    font-size: 1.55rem;
+    font-size: clamp(1.12rem, 7vw, 1.46rem);
+    overflow-wrap: anywhere;
+  }
+
+  .price-card-meta {
+    font-size: 0.84rem;
+  }
+
+  .price-card-price {
+    padding: 8px 10px;
+    font-size: 0.88rem;
+  }
+
+  .price-game-actions span {
+    font-size: 0.84rem;
+    line-height: 1.45;
+    text-align: left;
+  }
+
+  .price-game-next {
+    width: 100%;
   }
 
   .timeline-poster {
@@ -1415,9 +1492,48 @@
     justify-content: flex-start;
   }
 
+  .timeline-mobile-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 6px;
+    border: 1px solid rgba(127, 109, 242, 0.14);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .timeline-mobile-controls button {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--panel-soft);
+    color: var(--heading);
+    font-family: var(--display);
+    font-size: 1rem;
+  }
+
+  .timeline-mobile-controls button:disabled {
+    opacity: 0.42;
+    cursor: default;
+  }
+
+  .timeline-mobile-controls span {
+    min-width: 42px;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    text-align: center;
+  }
+
   .timeline-surface {
-    overflow-x: auto;
+    overflow: auto;
+    max-height: 68vh;
     border-radius: 20px;
+    overscroll-behavior: contain;
+    touch-action: pan-x pan-y pinch-zoom;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -1438,7 +1554,7 @@
   }
 
   .timeline-svg {
-    width: 1180px;
+    width: calc(1180px * var(--timeline-mobile-zoom, 1));
     max-width: none;
   }
 

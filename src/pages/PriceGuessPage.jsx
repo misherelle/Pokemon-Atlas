@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -152,6 +152,7 @@ function handleCardImageError(event) {
 }
 
 function PriceGuessPage() {
+  const autoRefreshReloaded = useRef(false)
   const [cards, setCards] = useState([])
   const [cardPool, setCardPool] = useState([])
   const [pairQueue, setPairQueue] = useState([])
@@ -237,16 +238,17 @@ function PriceGuessPage() {
   }, [])
 
   useEffect(() => {
-    if (!poolMeta?.nextRefreshAt || isLoading) {
+    if (!poolMeta?.nextRefreshAt || isLoading || autoRefreshReloaded.current) {
       return
     }
 
     const refreshAt = Date.parse(poolMeta.nextRefreshAt)
 
-    if (Number.isFinite(refreshAt) && now >= refreshAt) {
-      loadPool()
+    if (Number.isFinite(refreshAt) && now >= refreshAt + 1500) {
+      autoRefreshReloaded.current = true
+      window.location.reload()
     }
-  }, [isLoading, loadPool, now, poolMeta?.nextRefreshAt])
+  }, [isLoading, now, poolMeta?.nextRefreshAt])
 
   function loadNextPair() {
     setSelectedId(null)
@@ -256,7 +258,7 @@ function PriceGuessPage() {
       !cardPool.length ||
       (poolMeta?.nextRefreshAt && Date.now() >= Date.parse(poolMeta.nextRefreshAt))
     ) {
-      loadPool()
+      window.location.reload()
       return
     }
 
@@ -334,13 +336,26 @@ function PriceGuessPage() {
             <h2>Which card is worth more?</h2>
           </div>
           <div className="price-game-score" aria-label="Game score">
-            <span>Score</span>
-            <strong>{score}/{rounds}</strong>
-            <span>{getAccuracy(score, rounds)}% correct</span>
-            <span>
-              Streak {streak} · Best {bestStreak}
-            </span>
-            <span>Best score {formatScore(bestScore, bestScoreRounds)}</span>
+            <div className="price-score-stat">
+              <span>Score</span>
+              <strong>{score}/{rounds}</strong>
+            </div>
+            <div className="price-score-stat">
+              <span>Accuracy</span>
+              <strong>{getAccuracy(score, rounds)}%</strong>
+            </div>
+            <div className="price-score-stat">
+              <span>Streak</span>
+              <strong>{streak}</strong>
+            </div>
+            <div className="price-score-stat">
+              <span>Longest</span>
+              <strong>{bestStreak}</strong>
+            </div>
+            <div className="price-score-stat is-wide">
+              <span>Best run</span>
+              <strong>{formatScore(bestScore, bestScoreRounds)}</strong>
+            </div>
             <button
               type="button"
               className="price-score-reset"

@@ -145,11 +145,11 @@ p {
 
 @media (max-width: 720px) {
   h1 {
-    font-size: clamp(3rem, 18vw, 4.6rem);
+    font-size: clamp(2.7rem, 15vw, 4rem);
   }
 
   h2 {
-    font-size: clamp(2rem, 12vw, 3rem);
+    font-size: clamp(1.85rem, 10vw, 2.65rem);
   }
 
   #root {
