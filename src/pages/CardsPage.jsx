@@ -228,6 +228,18 @@ function CardsPage() {
                       </div>
                     ))}
                   </div>
+
+                  <div className="market-snapshot">
+                    <h4>Quick notes</h4>
+                    <div className="market-snapshot-grid">
+                      {card.market.map((item) => (
+                        <div key={item.label} className="snapshot-cell">
+                          <span>{item.label}</span>
+                          <strong>{item.value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -238,18 +250,6 @@ function CardsPage() {
                     <span>Major sale points</span>
                   </div>
                   <PriceHistoryChart points={card.priceHistory} />
-                </div>
-
-                <div className="market-snapshot">
-                  <h4>Quick notes</h4>
-                  <div className="market-snapshot-grid">
-                    {card.market.map((item) => (
-                      <div key={item.label} className="snapshot-cell">
-                        <span>{item.label}</span>
-                        <strong>{item.value}</strong>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </article>

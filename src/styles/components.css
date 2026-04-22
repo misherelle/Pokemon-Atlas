@@ -943,10 +943,10 @@
   align-items: stretch;
   justify-content: flex-start;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   width: fit-content;
   max-width: 100%;
-  min-height: 116px;
+  min-height: 126px;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -956,27 +956,28 @@
 .price-score-stat {
   display: grid;
   align-content: center;
-  gap: 2px;
-  min-width: 72px;
-  padding: 7px 9px;
+  gap: 5px;
+  flex: 0 0 104px;
+  min-height: 104px;
+  padding: 12px 13px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.72);
 }
 
 .price-score-stat.is-wide {
-  min-width: 150px;
+  flex-basis: 212px;
 }
 
 .price-score-stat span {
   color: var(--text-soft);
-  font-size: 0.72rem;
+  font-size: 0.86rem;
   line-height: 1.1;
 }
 
 .price-score-stat strong {
   color: var(--heading);
   font-family: var(--display);
-  font-size: 0.98rem;
+  font-size: 1.26rem;
   line-height: 1.05;
 }
 
@@ -1127,16 +1128,18 @@
 .price-game-actions {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 14px;
   margin-top: 16px;
 }
 
 .price-game-actions span {
+  flex: 1 1 auto;
   min-width: 0;
   color: var(--text-soft);
   font-size: 0.88rem;
   line-height: 1.35;
+  text-align: right;
 }
 
 .price-refresh-countdown {
@@ -1234,14 +1237,12 @@
 .case-study-template {
   display: grid;
   grid-template-columns:
-    minmax(160px, 220px)
-    minmax(240px, 330px)
-    minmax(360px, 520px);
-  gap: 16px;
+    minmax(190px, 0.46fr)
+    minmax(280px, 0.68fr)
+    minmax(430px, 0.9fr);
+  gap: 18px;
   align-items: start;
-  width: min(100%, 1120px);
-  margin-inline: auto;
-  padding: 18px;
+  padding: 20px;
   border-radius: 28px;
 }
 
@@ -1252,7 +1253,7 @@
 .case-study-info {
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -1274,21 +1275,34 @@
 
 .case-study-side {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
 }
 
 .price-history-slot,
 .market-snapshot {
-  padding: 14px;
-  border-radius: 20px;
+  padding: 16px;
+  border-radius: 22px;
   border: 1px solid var(--border);
   background: white;
+}
+
+.case-study-info .market-snapshot {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-color: rgba(127, 109, 242, 0.18);
+  background: linear-gradient(135deg, rgba(248, 244, 255, 0.96), rgba(255, 255, 255, 0.92));
 }
 
 .price-history-head,
 .market-snapshot h4 {
   margin: 0 0 14px;
+}
+
+.case-study-info .market-snapshot h4 {
+  margin: 0;
+  font-size: 1.05rem;
 }
 
 .price-history-head {
@@ -1393,13 +1407,29 @@
 .market-snapshot-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .snapshot-cell {
-  padding: 11px 12px;
-  border-radius: 14px;
+  padding: 12px;
+  border-radius: 16px;
   background: var(--panel-soft);
+}
+
+.case-study-info .market-snapshot-grid {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.case-study-info .snapshot-cell {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  border: 1px solid rgba(127, 109, 242, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.76);
 }
 
 .snapshot-cell span {
@@ -1411,9 +1441,18 @@
   letter-spacing: 0.12em;
 }
 
+.case-study-info .snapshot-cell span {
+  margin-bottom: 0;
+  font-size: 0.72rem;
+}
+
 .snapshot-cell strong {
   color: var(--heading);
   font-size: 1rem;
+}
+
+.case-study-info .snapshot-cell strong {
+  text-align: right;
 }
 
 .image-modal-backdrop {
@@ -1535,13 +1574,7 @@
   }
 }
 
-@media (max-width: 900px) {
-  .top-ten-card,
-  .price-card-grid,
-  .price-card {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 1180px) {
   .price-game-head {
     grid-template-columns: 1fr;
   }
@@ -1549,6 +1582,14 @@
   .price-game-score {
     width: 100%;
     min-height: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .top-ten-card,
+  .price-card-grid,
+  .price-card {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1678,7 +1719,7 @@
   .price-game-actions span {
     font-size: 0.84rem;
     line-height: 1.45;
-    text-align: left;
+    text-align: right;
   }
 
   .price-game-next {
