@@ -445,12 +445,10 @@ function PriceGuessPage() {
             onClick={cards.length === 2 ? loadNextPair : loadPool}
             disabled={isLoading}
           >
-            {selectedId ? 'Next pair' : cards.length === 2 ? 'Skip pair' : 'Retry'}
+            {selectedId ? 'Next' : cards.length === 2 ? 'Skip' : 'Retry'}
           </button>
           <span>
-            Pool of {poolMeta?.poolSize ?? 15} single cards, compared against each
-            other. New pools are ready on the clock every 10 minutes (:00, :10,
-            :20...)
+            {poolMeta?.poolSize ?? 15} cards. Refreshes every 10 minutes (:00, :10, :20...)
             {poolMeta?.nextRefreshAt ? (
               refreshCountdown && !isPoolExpired ? (
                 <>

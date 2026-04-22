@@ -305,15 +305,18 @@
 .page-stack {
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 
 .page-hero,
 .section-block,
 .landing-hero {
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 30px;
   background: var(--panel);
   box-shadow: var(--shadow-soft);
+  overflow: hidden;
 }
 
 .landing-hero {
@@ -390,7 +393,7 @@
 
 .page-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   gap: 24px;
   padding: 26px 28px;
   align-items: center;
@@ -414,9 +417,11 @@
   display: grid;
   gap: 12px;
   align-content: center;
+  min-width: 0;
 }
 
 .page-hero-note {
+  min-width: 0;
   padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: 24px;
@@ -579,7 +584,7 @@
   .landing-hero,
   .page-hero,
   .section-block {
-    padding: 16px;
+    padding: clamp(12px, 4vw, 16px);
     border-radius: 24px;
   }
 
@@ -611,7 +616,7 @@
   .metric-card,
   .page-hero-note {
     border-radius: 18px;
-    padding: 14px;
+    padding: clamp(12px, 3.8vw, 14px);
   }
 
   .mobile-bottom-nav {
@@ -664,5 +669,23 @@
     line-height: 1.1;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 380px) {
+  .app-shell {
+    padding-inline: 4px;
+    border-radius: 18px;
+  }
+
+  .page-stack {
+    gap: 12px;
+  }
+
+  .landing-hero,
+  .page-hero,
+  .section-block {
+    padding: 12px;
+    border-radius: 20px;
   }
 }

@@ -803,35 +803,19 @@ function HistoryTimeline({ events }) {
           </div>
 
         <div className="timeline-legend" aria-label="Timeline color legend">
-          <div className="timeline-legend-row">
-            {legendEntries.slice(0, 4).map(([category, label]) => (
-              <div key={category} className="timeline-legend-item">
-                <span
-                  className="timeline-legend-dot"
-                  style={{ backgroundColor: categoryColors[category] }}
-                  aria-hidden="true"
-                />
-                <span>{label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="timeline-legend-row">
-            {legendEntries.slice(4).map(([category, label]) => (
-              <div key={category} className="timeline-legend-item">
-                <span
-                  className="timeline-legend-dot"
-                  style={{ backgroundColor: categoryColors[category] }}
-                  aria-hidden="true"
-                />
-                <span>{label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="timeline-legend-row timeline-legend-row-note">
-            <div className="timeline-legend-item timeline-legend-note">
-              <span className="timeline-legend-gap" aria-hidden="true" />
-              <span>1 slash = about 2 years</span>
+          {legendEntries.map(([category, label]) => (
+            <div key={category} className="timeline-legend-item">
+              <span
+                className="timeline-legend-dot"
+                style={{ backgroundColor: categoryColors[category] }}
+                aria-hidden="true"
+              />
+              <span>{label}</span>
             </div>
+          ))}
+          <div className="timeline-legend-item timeline-legend-note">
+            <span className="timeline-legend-gap" aria-hidden="true" />
+            <span>1 slash = about 2 years</span>
           </div>
         </div>
 
