@@ -34,9 +34,8 @@ function MobileNavIcon({ name }) {
   if (name === 'timeline') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6 8.5a7 7 0 1 1-1 5.6" />
-        <path d="M4.8 8.5H8V5.3" />
-        <path d="M12 8.5v4l3 1.8" />
+        <circle cx="12" cy="12" r="7.5" />
+        <path d="M12 7.8v4.7h4.2" />
       </svg>
     )
   }
