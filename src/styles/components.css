@@ -848,8 +848,8 @@
 
 .visual-slot-zoom {
   position: absolute;
-  right: 22px;
-  bottom: 22px;
+  right: 10px;
+  bottom: 10px;
   display: grid;
   place-items: center;
   width: 34px;
@@ -876,6 +876,7 @@
   height: 14px;
   border: 2px solid var(--heading);
   border-radius: 50%;
+  transform: translate(-2px, -2px);
 }
 
 .visual-slot-zoom span::after {
