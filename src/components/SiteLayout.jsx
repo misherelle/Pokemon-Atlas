@@ -34,9 +34,9 @@ function MobileNavIcon({ name }) {
   if (name === 'timeline') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 12h16" />
-        <circle cx="7" cy="12" r="2" />
-        <circle cx="13" cy="12" r="2" />
+        <path d="M5 12h14" />
+        <circle cx="5" cy="12" r="2" />
+        <circle cx="12" cy="12" r="2" />
         <circle cx="19" cy="12" r="2" />
       </svg>
     )
@@ -72,9 +72,9 @@ function MobileNavIcon({ name }) {
 
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 12h10" />
-      <path d="M12 7v10" />
       <circle cx="12" cy="12" r="8" />
+      <path d="M12 7v10" />
+      <path d="M15 9.5c-.7-.7-1.7-1.1-3-1.1-1.6 0-2.6.7-2.6 1.8 0 1.2 1.1 1.6 2.8 1.9 1.7.3 2.8.8 2.8 2 0 1.1-1 1.8-2.8 1.8-1.3 0-2.5-.4-3.3-1.2" />
     </svg>
   )
 }
