@@ -384,7 +384,17 @@ function PriceGuessPage() {
               if (!card) {
                 return (
                   <div key={`loading-${index}`} className="price-card is-loading">
-                    Loading card...
+                    <span className="price-loading-content">
+                      <img
+                        src="/images/mew-swirl.gif"
+                        alt=""
+                        className="price-loading-gif"
+                        aria-hidden="true"
+                      />
+                      <span className="price-loading-text">
+                        <span>Loading cards...</span>
+                      </span>
+                    </span>
                   </div>
                 )
               }
@@ -473,7 +483,7 @@ function PriceGuessPage() {
               .
             </span>
             <span className="price-game-meta-line">
-              If it says “Loading card...” and not an error, give it a second.
+              If it says “Loading cards...” and not an error, give it a second.
               Cards above {formatPrice(minPrice)}. Source: PokéWallet API.
             </span>
           </span>
